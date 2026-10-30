@@ -1,0 +1,1677 @@
+/**
+ * PolyCode Light Theme — unified white + blue system.
+ * Loaded last so it wins over scattered per-page overrides.
+ */
+
+.app.theme-light {
+  --poly-blue: #2563eb;
+  --poly-blue-hover: #1d4ed8;
+  --poly-blue-deep: #1e40af;
+  --poly-blue-light: #eff6ff;
+  --poly-blue-dim: rgba(37, 99, 235, 0.1);
+  --poly-blue-border: rgba(37, 99, 235, 0.24);
+  --poly-surface: #ffffff;
+  --poly-surface-muted: #f8fafc;
+  --poly-surface-soft: #f1f5f9;
+  --btn-primary-bg: var(--poly-blue);
+  --btn-primary-bg-hover: var(--poly-blue-hover);
+  --btn-primary-text: #ffffff;
+
+  --bg: var(--poly-surface-muted);
+  --ink: var(--poly-surface-muted);
+  --ink-2: var(--poly-surface);
+  --ink-3: var(--poly-surface);
+  --ink-4: var(--poly-surface-soft);
+  --bg-card: var(--poly-surface);
+  --border: #e2e8f0;
+  --border-2: #cbd5e1;
+  --txt-0: #0f172a;
+  --txt-1: #334155;
+  --txt-2: #64748b;
+  --txt-3: #94a3b8;
+  --acid: var(--poly-blue);
+  --acid-rgb: 37, 99, 235;
+  --accent: var(--poly-blue);
+  --acid-dim: var(--poly-blue-dim);
+  --acid-glow: rgba(37, 99, 235, 0.22);
+  --cyan: #0284c7;
+  --cyan-dim: rgba(2, 132, 199, 0.1);
+  --vscode-blue: var(--poly-blue);
+  --vscode-blue-2: #3b82f6;
+  --vscode-panel: var(--poly-surface-soft);
+  --vscode-panel-2: #e2e8f0;
+  --vscode-border: #e2e8f0;
+  --numpy-accent: var(--poly-blue);
+  --course-accent: var(--poly-blue);
+  background: linear-gradient(180deg, #ffffff 0%, var(--poly-surface-muted) 48%, #f1f5f9 100%);
+}
+
+.app.theme-light .main-content.learn-content {
+  --ink: var(--poly-surface-muted);
+  --ink-2: var(--poly-surface);
+  --ink-3: var(--poly-surface);
+  --ink-4: var(--poly-surface-soft);
+  --border: #e2e8f0;
+  --border-2: #cbd5e1;
+  --txt-0: #0f172a;
+  --txt-1: #334155;
+  --txt-2: #64748b;
+  --txt-3: #94a3b8;
+  --acid: var(--poly-blue);
+  --acid-rgb: 37, 99, 235;
+  --accent: var(--poly-blue);
+  --acid-dim: var(--poly-blue-dim);
+  --acid-glow: rgba(37, 99, 235, 0.2);
+  --bg-card: var(--poly-surface);
+  --vscode-panel: var(--poly-surface-soft);
+  --vscode-panel-2: #e2e8f0;
+  --vscode-border: #e2e8f0;
+  --vscode-blue: var(--poly-blue);
+  --vscode-blue-2: #3b82f6;
+  --numpy-accent: var(--poly-blue);
+  --course-accent: var(--poly-blue);
+}
+
+/* ── Surfaces: white cards everywhere ── */
+.app.theme-light .main-content,
+.app.theme-light .layout,
+.app.theme-light .hero,
+.app.theme-light .oops-sidebar,
+.app.theme-light .oops-lesson-main,
+.app.theme-light .oops-lesson-topbar,
+.app.theme-light .numpy-step-card,
+.app.theme-light .numpy-lesson-hero,
+.app.theme-light .numpy-quiz-card,
+.app.theme-light .lesson-read-gate,
+.app.theme-light .lesson-confidence-panel,
+.app.theme-light .numpy-confidence-panel,
+.app.theme-light .profile-daily-xp-card,
+.app.theme-light .daily-challenge-page,
+.app.theme-light .challenge-card {
+  color: var(--txt-1);
+}
+
+.app.theme-light .oops-sidebar {
+  background: var(--poly-surface);
+  border-color: var(--border);
+}
+
+.app.theme-light .oops-lesson-topbar {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom-color: var(--border);
+}
+
+.app.theme-light .oops-tab.active {
+  color: var(--poly-blue);
+  border-bottom-color: var(--poly-blue);
+  background: transparent;
+}
+
+.app.theme-light .oops-tab:hover {
+  color: var(--poly-blue-deep);
+}
+
+/* ── Primary action buttons — all blue ── */
+.app.theme-light :is(
+    .btn-primary,
+    .navbar-signup-btn,
+    .auth-submit.btn-primary,
+    .search-btn,
+    .submit-btn,
+    .oops-run-btn,
+    .oops-run-code-btn,
+    .oops-auth-gate-btn-primary,
+    .profile-edit-btn-primary,
+    .language-primary-btn,
+    .oops-chapter-cta,
+    .lesson-mark-read-btn,
+    .lesson-challenge-cta,
+    .numpy-mark-read-btn,
+    .profile-daily-xp-mark:not(:disabled),
+    .pg-run-btn,
+    .btn-run,
+    .btn-analyze,
+    .landing-btn-hero-primary,
+    .polycode-landing .landing-btn-primary,
+    .polycode-landing .landing-mobile-cta,
+    .learn-profile-view-btn,
+    .continue-stack-btn
+  ) {
+  background: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border-color: var(--btn-primary-bg) !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.22);
+}
+
+.app.theme-light :is(
+    .btn-primary,
+    .navbar-signup-btn,
+    .auth-submit.btn-primary,
+    .search-btn,
+    .submit-btn,
+    .oops-run-btn,
+    .oops-run-code-btn,
+    .oops-auth-gate-btn-primary,
+    .profile-edit-btn-primary,
+    .language-primary-btn,
+    .oops-chapter-cta,
+    .lesson-mark-read-btn,
+    .lesson-challenge-cta,
+    .numpy-mark-read-btn,
+    .profile-daily-xp-mark:not(:disabled),
+    .pg-run-btn,
+    .btn-run,
+    .btn-analyze,
+    .landing-btn-hero-primary,
+    .polycode-landing .landing-btn-primary,
+    .polycode-landing .landing-mobile-cta,
+    .learn-profile-view-btn,
+    .continue-stack-btn
+  ):hover:not(:disabled) {
+  background: var(--btn-primary-bg-hover) !important;
+  border-color: var(--btn-primary-bg-hover) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  transform: translateY(-1px);
+}
+
+.app.theme-light .oops-run-btn:disabled,
+.app.theme-light .pg-run-btn:disabled,
+.app.theme-light .btn-primary:disabled {
+  background: #94a3b8 !important;
+  border-color: #94a3b8 !important;
+  color: #ffffff !important;
+  opacity: 0.65 !important;
+  transform: none !important;
+}
+
+/* Secondary / outline buttons */
+.app.theme-light :is(
+    .btn-secondary,
+    .navbar-login-btn,
+    .language-secondary-btn,
+    .profile-edit-btn:not(.profile-edit-btn-primary),
+    .oops-nav-btn,
+    .profile-daily-xp-btn,
+    .theme-settings-btn,
+    .landing-btn-secondary,
+    .landing-btn-hero-secondary
+  ) {
+  background: var(--poly-surface) !important;
+  color: var(--poly-blue) !important;
+  border: 1px solid var(--poly-blue-border) !important;
+}
+
+.app.theme-light :is(
+    .btn-secondary,
+    .navbar-login-btn,
+    .language-secondary-btn,
+    .profile-edit-btn:not(.profile-edit-btn-primary),
+    .oops-nav-btn,
+    .profile-daily-xp-btn,
+    .theme-settings-btn,
+    .landing-btn-secondary,
+    .landing-btn-hero-secondary
+  ):hover:not(:disabled) {
+  background: var(--poly-blue-light) !important;
+  color: var(--poly-blue-deep) !important;
+  border-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+.app.theme-light .oops-nav-next {
+  background: var(--btn-primary-bg) !important;
+  color: #ffffff !important;
+  border-color: var(--btn-primary-bg) !important;
+}
+
+/* Lesson read gate + confidence */
+.app.theme-light .lesson-read-gate,
+.app.theme-light .lesson-confidence-panel,
+.app.theme-light .numpy-mark-read-panel,
+.app.theme-light .numpy-confidence-panel {
+  background: var(--poly-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.app.theme-light .lesson-read-gate-hint,
+.app.theme-light .lesson-confidence-panel h3,
+.app.theme-light .numpy-confidence-panel h3 {
+  color: var(--txt-1) !important;
+}
+
+.app.theme-light .lesson-read-gate-error {
+  color: #dc2626 !important;
+}
+
+.app.theme-light .lesson-read-gate-timer {
+  color: #6d28d9 !important;
+}
+
+.app.theme-light .lesson-confidence-options button,
+.app.theme-light .numpy-confidence-options button {
+  background: var(--poly-surface-muted) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--txt-1) !important;
+}
+
+.app.theme-light .lesson-confidence-options button:hover,
+.app.theme-light .lesson-confidence-options button.active,
+.app.theme-light .numpy-confidence-options button:hover,
+.app.theme-light .numpy-confidence-options button.active {
+  background: var(--poly-blue-light) !important;
+  border-color: var(--poly-blue-border) !important;
+  color: var(--poly-blue-deep) !important;
+}
+
+/* Learn cards & hero */
+.app.theme-light .numpy-lesson-hero,
+.app.theme-light .numpy-step-card,
+.app.theme-light .numpy-diagram-item {
+  background: var(--poly-surface) !important;
+  border-color: var(--border) !important;
+}
+
+.app.theme-light .numpy-step-num:not(.numpy-step-num-code) {
+  color: #ffffff !important;
+  background: var(--poly-blue) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-lesson-intro-label,
+.app.theme-light .main-content.learn-content .numpy-chapter-badge {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .numpy-intro-theory--course-start .numpy-chapter-badge {
+  color: #b45309 !important;
+}
+
+.app.theme-light .numpy-intro-theory--course-start .numpy-lesson-hero {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.06),
+    var(--poly-surface) 55%
+  ) !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+  box-shadow: 0 0 0 1px rgba(180, 83, 9, 0.12) !important;
+}
+
+.app.theme-light .numpy-intro-theory--course-start .lesson-objectives {
+  background: rgba(37, 99, 235, 0.06) !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+}
+
+.app.theme-light .numpy-intro-theory--course-start .numpy-path-label span {
+  color: #b45309 !important;
+}
+
+.app.theme-light .numpy-step-num-code {
+  display: none !important;
+}
+
+.app.theme-light .numpy-lesson-title,
+.app.theme-light .numpy-step-label {
+  color: var(--txt-0) !important;
+}
+
+/* IDE run button text fix (was forced dark) */
+.app.theme-light .pg-run-btn,
+.app.theme-light .ide-btn.run-btn {
+  color: #ffffff !important;
+}
+
+.app.theme-light .ide-btn.run-btn {
+  background: var(--poly-blue-dim) !important;
+  border-color: var(--poly-blue-border) !important;
+  color: var(--poly-blue-deep) !important;
+}
+
+.app.theme-light .ide-btn.run-btn:hover:not(:disabled) {
+  background: var(--poly-blue) !important;
+  color: #ffffff !important;
+}
+
+/* Assistant + lesson markup FAB (portaled to body — need html[data-theme]) */
+html[data-theme="light"] :is(
+    .assistant-avatar-wrap--mascot.assistant-avatar-wrap--highlight,
+    .assistant-avatar-wrap--highlight
+  ),
+.app.theme-light :is(
+    .assistant-avatar-wrap--mascot.assistant-avatar-wrap--highlight,
+    .assistant-avatar-wrap--highlight
+  ) {
+  background: #f8fafc !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 0 0 1px rgba(37, 99, 235, 0.14),
+    0 6px 20px rgba(15, 23, 42, 0.08) !important;
+}
+
+html[data-theme="light"] .polym_mentor-dock.assistant-dock-btn--compact,
+.app.theme-light .polym_mentor-dock.assistant-dock-btn--compact {
+  background: #ffffff !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.12),
+    0 10px 28px rgba(15, 23, 42, 0.1) !important;
+}
+
+html[data-theme="light"] .polym_mentor-dock.assistant-dock-btn--compact:hover,
+.app.theme-light .polym_mentor-dock.assistant-dock-btn--compact:hover {
+  background: var(--poly-blue-light) !important;
+  border-color: var(--poly-blue-border) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+html[data-theme="light"] .assistant-dock-btn:hover,
+.app.theme-light .assistant-dock-btn:hover {
+  border-color: var(--poly-blue) !important;
+  background: var(--poly-blue-light) !important;
+}
+
+/* Lesson markup floating button + menu */
+html[data-theme="light"] .lesson-annotator-fab,
+.app.theme-light .lesson-annotator-fab {
+  background: #ffffff !important;
+  border: 1px solid rgba(37, 99, 235, 0.28) !important;
+  color: var(--poly-blue) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1) !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab:hover,
+html[data-theme="light"] .lesson-annotator-fab--open,
+.app.theme-light .lesson-annotator-fab:hover,
+.app.theme-light .lesson-annotator-fab--open {
+  background: var(--poly-blue-light) !important;
+  border-color: rgba(37, 99, 235, 0.42) !important;
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.14) !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-menu,
+.app.theme-light .lesson-annotator-fab-menu {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1) !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-menu-head,
+.app.theme-light .lesson-annotator-fab-menu-head {
+  border-bottom-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-tools button,
+html[data-theme="light"] .lesson-annotator-fab-clear,
+.app.theme-light .lesson-annotator-fab-tools button,
+.app.theme-light .lesson-annotator-fab-clear {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-tools button:hover,
+html[data-theme="light"] .lesson-annotator-fab-clear:hover,
+.app.theme-light .lesson-annotator-fab-tools button:hover,
+.app.theme-light .lesson-annotator-fab-clear:hover {
+  background: var(--poly-blue-light) !important;
+  color: var(--poly-blue-deep) !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-tools button.active,
+.app.theme-light .lesson-annotator-fab-tools button.active {
+  background: var(--poly-blue-light) !important;
+  border-color: rgba(37, 99, 235, 0.35) !important;
+  color: var(--poly-blue-deep) !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-colors,
+.app.theme-light .lesson-annotator-fab-colors {
+  border-top-color: #e2e8f0 !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-colors > span,
+html[data-theme="light"] .lesson-annotator-fab-hint,
+.app.theme-light .lesson-annotator-fab-colors > span,
+.app.theme-light .lesson-annotator-fab-hint {
+  color: #94a3b8 !important;
+}
+
+html[data-theme="light"] .lesson-annotator-fab-close,
+.app.theme-light .lesson-annotator-fab-close {
+  color: #64748b !important;
+}
+
+/* Profile */
+.app.theme-light .profile-edit-btn-primary {
+  color: #ffffff !important;
+}
+
+.app.theme-light .profile-hero-stat:hover strong,
+.app.theme-light .profile-hero-stat[aria-expanded="true"] strong {
+  color: var(--poly-blue) !important;
+}
+
+/* Quizzes — readable options (not dark gray slabs) */
+.app.theme-light .main-content.learn-content .numpy-quiz-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(37, 99, 235, 0.22) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-card.correct {
+  border-color: rgba(22, 163, 74, 0.45) !important;
+  background: #f0fdf4 !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-card.wrong {
+  border-color: rgba(220, 38, 38, 0.4) !important;
+  background: #fef2f2 !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-question {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-option {
+  background: #f8fafc !important;
+  border: 1px solid rgba(37, 99, 235, 0.22) !important;
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-option:hover {
+  border-color: rgba(37, 99, 235, 0.45) !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-option.selected {
+  border-color: var(--poly-blue) !important;
+  background: var(--poly-blue-light) !important;
+  color: var(--poly-blue-deep) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-option.answer {
+  border-color: #16a34a !important;
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-quiz-feedback {
+  border-top-color: rgba(37, 99, 235, 0.15) !important;
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-viewport .lesson-quiz-slide,
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-viewport .lesson-quiz-slide--correct,
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-viewport .lesson-quiz-slide--wrong {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-count {
+  color: #2563eb !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-progress {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-controls {
+  border-top-color: rgba(37, 99, 235, 0.15) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-nav {
+  background: #f8fafc !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-nav:hover:not(:disabled) {
+  background: #eff6ff !important;
+  border-color: rgba(37, 99, 235, 0.45) !important;
+  color: #1d4ed8 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-retry {
+  background: #eff6ff !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+  color: #1d4ed8 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-retry:hover {
+  background: #dbeafe !important;
+  border-color: rgba(37, 99, 235, 0.5) !important;
+  color: #1e40af !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-retry-hint {
+  border-top-color: rgba(37, 99, 235, 0.15) !important;
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary {
+  background: #f8fafc !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary--perfect {
+  background: #f0fdf4 !important;
+  border-color: rgba(22, 163, 74, 0.35) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary-text strong {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary-text p {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary-score {
+  color: #2563eb !important;
+}
+
+.app.theme-light
+  .main-content.learn-content
+  .lesson-quiz-summary--perfect
+  .lesson-quiz-summary-score {
+  color: #16a34a !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary-bar {
+  background: rgba(37, 99, 235, 0.15) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary-bar span {
+  background: #2563eb !important;
+}
+
+.app.theme-light
+  .main-content.learn-content
+  .lesson-quiz-summary--perfect
+  .lesson-quiz-summary-bar
+  span {
+  background: #16a34a !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary-btn {
+  background: #ffffff !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-summary-btn:hover {
+  background: #eff6ff !important;
+  border-color: rgba(37, 99, 235, 0.45) !important;
+  color: #1d4ed8 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-dot {
+  background: #cbd5e1 !important;
+}
+
+.app.theme-light
+  .main-content.learn-content
+  .lesson-quiz-slider-dot--right:not(.lesson-quiz-slider-dot--active) {
+  background: #16a34a !important;
+}
+
+.app.theme-light
+  .main-content.learn-content
+  .lesson-quiz-slider-dot--wrong:not(.lesson-quiz-slider-dot--active) {
+  background: #e11d48 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-dot--active {
+  background: #2563eb !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-quiz-slider-dot--done:not(.lesson-quiz-slider-dot--active) {
+  background: #93c5fd !important;
+}
+
+/* Scrollbar */
+.app.theme-light ::-webkit-scrollbar-track {
+  background: var(--poly-surface-soft);
+}
+
+.app.theme-light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+.app.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.app.theme-light * {
+  scrollbar-color: #cbd5e1 var(--poly-surface-soft);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Course hubs — path cards, stats, chapter grid (all courses)
+   ══════════════════════════════════════════════════════════════ */
+
+.app.theme-light .main-content.learn-content .oops-stat-tile {
+  background: var(--poly-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.app.theme-light .main-content.learn-content .oops-stat-tile span {
+  color: var(--txt-3) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-stat-tile strong {
+  color: var(--txt-0) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-path-step {
+  background: var(--poly-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  color: var(--txt-1) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-path-step:hover {
+  border-color: var(--poly-blue-border) !important;
+  background: var(--poly-blue-light) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-path-step.active,
+.app.theme-light .main-content.learn-content .oops-path-step.done {
+  border-color: var(--poly-blue) !important;
+  background: var(--poly-blue-light) !important;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
+}
+
+.app.theme-light .main-content.learn-content .oops-path-step-body strong {
+  color: var(--txt-0) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-path-step-num {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-chapter-card.oops-chapter-done {
+  border-color: rgba(37, 99, 235, 0.35) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-done-badge {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-chapter-header {
+  border-bottom-color: var(--border) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-chapter-num,
+.app.theme-light .main-content.learn-content .oops-chapter-meta {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-lesson-item {
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-lesson-xp {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-chapter-progress-track {
+  background: #e2e8f0 !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-xp-meta {
+  color: #475569 !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-xp-track {
+  background: #e2e8f0 !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-back-btn {
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-back-btn:hover {
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-chapter-title {
+  color: var(--txt-0) !important;
+}
+
+/* ── SciPy hub + theory (light mode contrast) ─────────────────────────────── */
+.app.theme-light .scipy-hub .scipy-hero,
+.app.theme-light .scipy-hub .oops-hero {
+  background:
+    linear-gradient(125deg, rgba(13, 148, 136, 0.1), transparent 42%),
+    linear-gradient(200deg, rgba(124, 58, 237, 0.08), transparent 55%),
+    #ffffff !important;
+  border: 1px solid rgba(13, 148, 136, 0.22) !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06) !important;
+}
+
+.app.theme-light .scipy-hub .oops-hero-title {
+  color: #0f172a !important;
+}
+
+.app.theme-light .scipy-hub .oops-hero-sub {
+  color: #475569 !important;
+}
+
+.app.theme-light .scipy-hub .oops-hero-accent {
+  background: linear-gradient(90deg, #0f766e, #6d28d9) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.app.theme-light .scipy-hub .scipy-hero-badge,
+.app.theme-light .scipy-hub .oops-hero-badge.scipy-hero-badge {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+  border: 1px solid #0f766e !important;
+  letter-spacing: 0.1em;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+}
+
+.app.theme-light .scipy-hub .scipy-level-chip {
+  color: #ffffff !important;
+  background: #7c3aed !important;
+  border: 1px solid #6d28d9 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.22);
+}
+
+.app.theme-light .scipy-hub .oops-back-btn {
+  color: #0f172a !important;
+  border: 1px solid #94a3b8 !important;
+  background: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.app.theme-light .scipy-hub .oops-back-btn:hover {
+  color: #0f172a !important;
+  border-color: #0d9488 !important;
+  background: #f0fdfa !important;
+}
+
+.app.theme-light .scipy-hub .scipy-module-pill {
+  color: #134e4a !important;
+  background: #ccfbf1 !important;
+  border: 1px solid #5eead4 !important;
+  font-weight: 600 !important;
+}
+
+.app.theme-light .scipy-hub .scipy-hero-orbit {
+  opacity: 0.35;
+}
+
+.app.theme-light .scipy-hub .scipy-dashboard-strip .oops-stat-tile {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.app.theme-light .scipy-hub .scipy-dashboard-strip .oops-stat-tile span {
+  color: #64748b !important;
+}
+
+.app.theme-light .scipy-hub .scipy-dashboard-strip .oops-stat-tile strong {
+  color: #0f766e !important;
+}
+
+.app.theme-light .scipy-hub .scipy-path-label {
+  border-bottom-color: rgba(13, 148, 136, 0.2) !important;
+}
+
+.app.theme-light .scipy-hub .scipy-path-label span {
+  color: #0f766e !important;
+}
+
+.app.theme-light .scipy-hub .scipy-path-label small {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .scipy-path-card {
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--stage-color) 10%, #ffffff),
+      #ffffff 55%
+    ) !important;
+  border: 1px solid color-mix(in srgb, var(--stage-color) 28%, #e2e8f0) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.app.theme-light .main-content.learn-content .scipy-path-level {
+  color: var(--stage-color, #0f766e) !important;
+}
+
+.app.theme-light .main-content.learn-content .scipy-path-pct {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .scipy-path-summary {
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .scipy-path-chapters li {
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .scipy-path-cta {
+  color: #ffffff !important;
+  background: var(--stage-color, #0d9488) !important;
+}
+
+.app.theme-light .scipy-hub .oops-resume-panel {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.app.theme-light .scipy-hub .oops-resume-panel h3,
+.app.theme-light .scipy-hub .oops-resume-panel strong {
+  color: #0f172a !important;
+}
+
+.app.theme-light .scipy-hub .oops-resume-panel p,
+.app.theme-light .scipy-hub .oops-resume-panel small {
+  color: #64748b !important;
+}
+
+.app.theme-light .scipy-hub .oops-tool-panel.scipy-tool-panel {
+  background: #ffffff !important;
+  border-color: rgba(13, 148, 136, 0.2) !important;
+}
+
+/* SciPy theory lab banner + lesson chrome */
+.app.theme-light .scipy-theory-shell .scipy-lab-banner {
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--scipy-accent, #0d9488) 12%, #ffffff),
+      rgba(124, 58, 237, 0.08)
+    ) !important;
+  border-color: color-mix(in srgb, var(--scipy-accent, #0d9488) 28%, #e2e8f0) !important;
+}
+
+.app.theme-light .scipy-theory-shell .scipy-lab-pill {
+  color: #ffffff !important;
+  background: #0d9488 !important;
+}
+
+.app.theme-light .scipy-theory-shell .scipy-lab-banner-copy strong {
+  color: #0f172a !important;
+}
+
+.app.theme-light .scipy-theory-shell .scipy-lab-banner-copy p {
+  color: #475569 !important;
+}
+
+.app.theme-light .scipy-lesson-page .scipy-chapter-tag {
+  background: color-mix(in srgb, var(--scipy-accent, #0d9488) 14%, #ffffff) !important;
+  color: #0f766e !important;
+  border: 1px solid color-mix(in srgb, var(--scipy-accent, #0d9488) 28%, #e2e8f0);
+}
+
+.app.theme-light .scipy-lesson-page .oops-lesson-topbar {
+  background: #ffffff !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+.app.theme-light .scipy-lesson-page .oops-tabs.scipy-tabs {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.app.theme-light .scipy-lesson-page .scipy-tabs .oops-tab {
+  color: #64748b !important;
+}
+
+.app.theme-light .scipy-lesson-page .scipy-tabs .oops-tab.active {
+  color: #0f766e !important;
+  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.35);
+  background: rgba(13, 148, 136, 0.08) !important;
+}
+
+/* Matplotlib hub — learning path cards */
+.app.theme-light .matplotlib-hub .matplotlib-hero,
+.app.theme-light .matplotlib-hub .oops-hero {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.07), transparent 48%),
+    var(--poly-surface) !important;
+  border-color: var(--border) !important;
+}
+
+.app.theme-light .matplotlib-hub .matplotlib-hero::before,
+.app.theme-light .matplotlib-hub .oops-hero::before {
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.1) 0%,
+    transparent 70%
+  ) !important;
+}
+
+.app.theme-light .matplotlib-hub .oops-hero-accent {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-label {
+  border-bottom-color: var(--border) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-label span {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-label small {
+  color: var(--txt-3) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-card {
+  background: var(--poly-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-level {
+  color: var(--stage-color, var(--poly-blue)) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-pct {
+  color: var(--txt-3) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-summary {
+  color: var(--txt-1) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-chapters li {
+  color: var(--txt-1) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-cta {
+  background: var(--poly-blue) !important;
+  border: 1px solid var(--poly-blue) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.22);
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-path-cta:hover {
+  background: var(--poly-blue-hover) !important;
+  border-color: var(--poly-blue-hover) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-prerequisites {
+  background: var(--poly-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-prerequisites-head span {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-prereq-card {
+  background: var(--poly-surface-muted) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-prereq-card:hover {
+  border-color: var(--poly-blue-border) !important;
+  background: var(--poly-blue-light) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-prereq-card strong {
+  color: var(--txt-0) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-prereq-card p,
+.app.theme-light .main-content.learn-content .matplotlib-runtime-note {
+  color: var(--txt-2) !important;
+}
+
+.app.theme-light .main-content.learn-content .matplotlib-prereq-cheat {
+  border-color: rgba(37, 99, 235, 0.25) !important;
+  background: var(--poly-blue-light) !important;
+}
+
+/* NumPy / shared lesson theory surfaces */
+.app.theme-light .main-content.learn-content .numpy-concept-code {
+  border-top-color: var(--border) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-inline-code {
+  background: var(--poly-blue-light) !important;
+  color: var(--poly-blue-deep) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-tip-box {
+  border-color: rgba(37, 99, 235, 0.2) !important;
+  background: var(--poly-blue-light) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-diagram-item h4 {
+  color: var(--txt-0) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-diagram-item ul {
+  color: var(--txt-1) !important;
+}
+
+/* Runnable code blocks + lesson IDE runner */
+.app.theme-light .main-content.learn-content .oops-code-block {
+  background: var(--poly-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-code-label {
+  background: var(--poly-surface-muted) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-code-lang {
+  color: #ffffff !important;
+  background: var(--poly-blue) !important;
+  border-color: var(--poly-blue-hover) !important;
+  box-shadow: none !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-code-file {
+  color: var(--txt-3) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-copy-btn {
+  background: var(--poly-surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--txt-1) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-copy-btn:hover {
+  background: var(--poly-blue-light) !important;
+  border-color: var(--poly-blue-border) !important;
+  color: var(--poly-blue-deep) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-run-code-btn {
+  background: var(--poly-blue) !important;
+  border: 1px solid var(--poly-blue) !important;
+  color: #ffffff !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-run-code-btn:hover:not(:disabled) {
+  background: var(--poly-blue-hover) !important;
+  border-color: var(--poly-blue-hover) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-theory-editor {
+  border-top-color: var(--border) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-theory-editor .monaco-editor,
+.app.theme-light .main-content.learn-content .oops-theory-editor .monaco-editor-background,
+.app.theme-light .main-content.learn-content .oops-theory-editor .margin-view-overlays {
+  background: #f8fafc !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-theory-editor .monaco-editor .view-overlays .current-line,
+.app.theme-light .main-content.learn-content .oops-theory-editor .monaco-editor .margin-view-overlays .current-line {
+  background: #dbeafe !important;
+  border: none !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-auth-gate-theory {
+  border-top-color: var(--border) !important;
+  background: var(--poly-surface-muted) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-clear-output-btn {
+  border-color: var(--border) !important;
+  color: var(--txt-2) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-clear-output-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border)) !important;
+  color: var(--accent) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-output-panel {
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--accent) 7%, transparent),
+      transparent 40%
+    ),
+    #f8fafc !important;
+  border-color: color-mix(in srgb, var(--accent) 16%, var(--border)) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-output-head {
+  border-bottom-color: color-mix(in srgb, var(--accent) 14%, var(--border)) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-theory-output {
+  border-top-color: color-mix(in srgb, var(--accent) 14%, var(--border)) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-editor .monaco-editor,
+.app.theme-light .main-content.learn-content .oops-editor .monaco-editor-background,
+.app.theme-light .main-content.learn-content .oops-editor .monaco-editor .margin,
+.app.theme-light .main-content.learn-content .oops-editor .monaco-editor .margin-view-overlays {
+  background: #ffffff !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-editor .monaco-editor .view-overlays .current-line,
+.app.theme-light .main-content.learn-content .oops-editor .monaco-editor .margin-view-overlays .current-line {
+  background: #dbeafe !important;
+  border: none !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-editor-action {
+  color: var(--txt-1) !important;
+  border-color: var(--border) !important;
+  background: var(--poly-surface) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-editor-action:hover:not(:disabled) {
+  background: var(--poly-blue-light) !important;
+  color: var(--poly-blue-deep) !important;
+  border-color: var(--poly-blue-border) !important;
+}
+
+.app.theme-light .main-content.learn-content .oops-auth-gate-btn-primary {
+  background: var(--poly-blue) !important;
+  color: #ffffff !important;
+  border-color: var(--poly-blue) !important;
+}
+
+/* Other course hub heroes */
+.app.theme-light .numpy-hub .numpy-hero,
+.app.theme-light .numpy-hub .oops-hero {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.07), transparent 48%),
+    var(--poly-surface) !important;
+}
+
+.app.theme-light .numpy-hub .oops-hero-accent {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .pandas-hub .oops-hero-accent,
+.app.theme-light .fastapi-hub .oops-hero-accent,
+.app.theme-light .ai-ml-hub .oops-hero-accent {
+  color: var(--poly-blue) !important;
+}
+
+/* NumPy lesson theory — readable text + blue tables in light mode */
+.app.theme-light .main-content.learn-content .numpy-outcomes-heading,
+.app.theme-light .main-content.learn-content .numpy-path-label span {
+  color: var(--poly-blue) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-lesson-outcomes {
+  background: #eff6ff !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-overview:not(.lesson-topic-overview--w3) {
+  background:
+    linear-gradient(145deg, rgba(37, 99, 235, 0.1), rgba(255, 255, 255, 0.72) 55%),
+    rgba(248, 250, 252, 0.88) !important;
+  border-color: rgba(37, 99, 235, 0.18) !important;
+  border-left: 1px solid rgba(37, 99, 235, 0.18) !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 10px 28px rgba(15, 23, 42, 0.06) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-overview--w3 {
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      rgba(255, 255, 255, 0.78) 52%
+    ),
+    rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, #e2e8f0) !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 12px 30px rgba(15, 23, 42, 0.07) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-chapter,
+.app.theme-light .main-content.learn-content .lesson-topic-w3-cli,
+.app.theme-light .main-content.learn-content .lesson-topic-w3-example-note {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-section-title {
+  color: var(--accent) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-overview-title {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-overview-summary,
+.app.theme-light .main-content.learn-content .lesson-topic-overview-essentials-list li {
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-overview-essentials {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(37, 99, 235, 0.14) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-overview-practice {
+  color: #64748b !important;
+  border-top-color: rgba(37, 99, 235, 0.12) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-overview--w3 .lesson-topic-w3-title {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-definition,
+.app.theme-light .main-content.learn-content .lesson-topic-w3-list li {
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-syntax {
+  background: rgba(248, 250, 252, 0.92) !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-syntax:not(.lesson-topic-w3-syntax--highlighted) code {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-syntax--highlighted {
+  background:
+    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98)) !important;
+  border-color: rgba(51, 65, 85, 0.9) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-cli code {
+  background: color-mix(in srgb, var(--accent) 10%, #f1f5f9) !important;
+  border-color: color-mix(in srgb, var(--accent) 28%, #e2e8f0) !important;
+  color: color-mix(in srgb, var(--accent) 88%, #0f172a) !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-table th {
+  background: var(--accent) !important;
+  color: #fff !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-table td {
+  color: #334155 !important;
+  background: #fff !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-table tr:nth-child(even) td {
+  background: #f1f5f9 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-note {
+  background: linear-gradient(135deg, #fffbeb, rgba(255, 255, 255, 0.9)) !important;
+  color: #713f12 !important;
+  border: 1px solid #fde68a !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-note strong {
+  color: #92400e !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-tip {
+  background: linear-gradient(135deg, #ecfdf5, rgba(255, 255, 255, 0.9)) !important;
+  color: #14532d !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-topic-w3-practice {
+  background: color-mix(in srgb, var(--accent) 8%, #ffffff) !important;
+  border-color: color-mix(in srgb, var(--accent) 38%, #e2e8f0) !important;
+  color: var(--txt-1, #334155) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-path-label {
+  border-bottom-color: rgba(37, 99, 235, 0.15) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-path-label small {
+  color: #64748b !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-lesson-title {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-lesson-hook {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-lesson-hook strong {
+  color: #0f172a !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-step-text,
+.app.theme-light .main-content.learn-content .numpy-vt-footnote,
+.app.theme-light .main-content.learn-content .numpy-array-footnote,
+.app.theme-light .main-content.learn-content .numpy-matrix-footnote,
+.app.theme-light .main-content.learn-content .lesson-scenario p,
+.app.theme-light .main-content.learn-content .numpy-diagram-item ul,
+.app.theme-light .main-content.learn-content .numpy-diagram-item h4,
+.app.theme-light .main-content.learn-content .numpy-outcomes-list,
+.app.theme-light .main-content.learn-content .numpy-tip-box p {
+  color: #334155 !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-step-text strong,
+.app.theme-light .main-content.learn-content .numpy-vt-footnote strong,
+.app.theme-light .main-content.learn-content .numpy-array-footnote strong,
+.app.theme-light .main-content.learn-content .lesson-scenario strong {
+  color: #1e293b !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-inline-code {
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: #1d4ed8 !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-visual-table th,
+.app.theme-light .main-content.learn-content .numpy-visual-table td {
+  border: 1px solid rgba(37, 99, 235, 0.28) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-vt-col-head,
+.app.theme-light .main-content.learn-content .numpy-vt-row-head,
+.app.theme-light .main-content.learn-content .numpy-vt-corner:not(:empty) {
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+  font-weight: 600;
+}
+
+.app.theme-light .main-content.learn-content .numpy-vt-cell {
+  color: #334155 !important;
+  background: #ffffff !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-vt-row-highlight .numpy-vt-row-head,
+.app.theme-light .main-content.learn-content .numpy-vt-row-highlight .numpy-vt-cell {
+  background: rgba(37, 99, 235, 0.08) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-diagram-item {
+  background: #f8fafc !important;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-array-row-block {
+  background: #f8fafc !important;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+.app.theme-light .main-content.learn-content .numpy-array-col-label,
+.app.theme-light .main-content.learn-content .numpy-array-row-label {
+  color: #2563eb !important;
+}
+
+.app.theme-light .main-content.learn-content .lesson-scenario {
+  background: #eff6ff !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+}
+
+
+/* POWERSHELL HUB LIGHT THEME */
+.app.theme-light .powershell-hub .matplotlib-hero,
+.app.theme-light .powershell-hub .oops-hero {
+  background: linear-gradient(135deg, #f0fdfa 0%, #dbeafe 100%);
+  border-bottom: 1px solid #bfdbfe;
+}
+
+.app.theme-light .powershell-hub .matplotlib-hero::before,
+.app.theme-light .powershell-hub .oops-hero::before {
+  background: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1), transparent 50%);
+}
+
+.app.theme-light .powershell-hub .oops-hero-accent {
+  color: #2563eb;
+}
+
+/* ── C++ Data Structures theory (cppds-*) light readability ── */
+.app.theme-light .cppds-lesson {
+  color: #1e293b;
+}
+.app.theme-light .cppds-kicker,
+.app.theme-light .cppds-scenario-label {
+  color: #7c3aed !important;
+}
+.app.theme-light .cppds-title {
+  color: #0f172a !important;
+}
+.app.theme-light .cppds-lead .cppds-prose,
+.app.theme-light .cppds-prose,
+.app.theme-light .cppds-prose p,
+.app.theme-light .cppds-prose li,
+.app.theme-light .cppds-scenario p,
+.app.theme-light .cppds-note p,
+.app.theme-light .cppds-goals li,
+.app.theme-light .cppds-fignote {
+  color: #334155 !important;
+  opacity: 1;
+}
+.app.theme-light .cppds-goals,
+.app.theme-light .cppds-scenario {
+  background: #f5f3ff !important;
+  border-color: rgba(124, 58, 237, 0.28) !important;
+}
+.app.theme-light .cppds-goals h3,
+.app.theme-light .cppds-figure-title,
+.app.theme-light .cppds-card h4 {
+  color: #1e293b !important;
+}
+.app.theme-light .cppds-card {
+  background: #ffffff !important;
+  border-color: rgba(124, 58, 237, 0.2) !important;
+}
+.app.theme-light .cppds-table {
+  background: #ffffff;
+  border-color: rgba(124, 58, 237, 0.22);
+}
+.app.theme-light .cppds-table th,
+.app.theme-light .cppds-table td {
+  color: #334155 !important;
+  border-color: rgba(124, 58, 237, 0.18) !important;
+}
+.app.theme-light .cppds-table caption {
+  color: #5b21b6 !important;
+}
+.app.theme-light .cppds-code-inline {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #6d28d9 !important;
+}
+.app.theme-light .cppds-note {
+  background: #f8fafc !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+}
+/* ── Playground remaining light gaps ── */
+.app.theme-light .playground-page,
+.app.theme-light .playground-root,
+.app.theme-light .pg-workspace {
+  background: #f8fafc !important;
+  color: #1e293b !important;
+}
+.app.theme-light .playground-page p,
+.app.theme-light .playground-page-header p,
+.app.theme-light .pg-panel-label,
+.app.theme-light .pg-status-text {
+  color: #475569 !important;
+}
+.app.theme-light .pg-panel,
+.app.theme-light .pg-editor-pane,
+.app.theme-light .pg-output-pane {
+  background: #ffffff !important;
+  border-color: rgba(37, 99, 235, 0.18) !important;
+}
+.app.theme-light .pg-output-pre,
+.app.theme-light .pg-console {
+  color: #1e293b !important;
+  background: #f1f5f9 !important;
+}
+
+/* ── Learn hub shared cards (correct selectors) ── */
+.app.theme-light .main-content.learn-content .oops-hub .oops-tool-panel,
+.app.theme-light .main-content.learn-content .oops-search-result,
+.app.theme-light .main-content.learn-content .oops-bookmark-list button,
+.app.theme-light .main-content.learn-content .oops-chapter-card {
+  background: #ffffff !important;
+  border-color: rgba(37, 99, 235, 0.16) !important;
+  color: #1e293b !important;
+}
+.app.theme-light .main-content.learn-content .oops-hub .oops-tool-panel h2,
+.app.theme-light .main-content.learn-content .oops-chapter-card h3,
+.app.theme-light .main-content.learn-content .oops-search-result strong {
+  color: #0f172a !important;
+}
+.app.theme-light .main-content.learn-content .oops-hub .oops-tool-panel p,
+.app.theme-light .main-content.learn-content .oops-search-result small,
+.app.theme-light .main-content.learn-content .oops-interactive-label {
+  color: #475569 !important;
+}
+
+/* Hub search + filter wells */
+.app.theme-light .main-content.learn-content .oops-search-row input {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border-color: #e2e8f0 !important;
+}
+.app.theme-light .main-content.learn-content .oops-search-row input::placeholder {
+  color: #94a3b8 !important;
+}
+.app.theme-light .main-content.learn-content .oops-filter-tabs {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+.app.theme-light .main-content.learn-content .oops-filter-tabs button {
+  color: #64748b !important;
+}
+.app.theme-light .main-content.learn-content .oops-filter-tabs button.active {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+.app.theme-light .main-content.learn-content .oops-search-result:hover,
+.app.theme-light .main-content.learn-content .oops-bookmark-list button:hover {
+  background: #eff6ff !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+}
+
+/* Lesson chrome: tabs, status, theory text */
+.app.theme-light .main-content.learn-content .oops-tabs {
+  background: #ffffff !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+.app.theme-light .main-content.learn-content .oops-tab {
+  color: #64748b !important;
+}
+.app.theme-light .main-content.learn-content .oops-tab:hover {
+  color: #334155 !important;
+}
+.app.theme-light .main-content.learn-content .oops-tab.active {
+  color: #1d4ed8 !important;
+  border-bottom-color: #2563eb !important;
+}
+.app.theme-light .main-content.learn-content .oops-tab-xp {
+  color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+}
+.app.theme-light .main-content.learn-content .oops-lesson-status-strip {
+  background: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+.app.theme-light .main-content.learn-content .oops-concept-text,
+.app.theme-light .main-content.learn-content .oops-easy-summary p {
+  color: #334155 !important;
+}
+.app.theme-light .main-content.learn-content .oops-term-cloud span {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  border-color: #e2e8f0 !important;
+}
+.app.theme-light .main-content.learn-content .oops-completed-badge {
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+}
+.app.theme-light .main-content.learn-content .oops-bookmark-btn,
+.app.theme-light .main-content.learn-content .oops-focus-btn {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+.app.theme-light .main-content.learn-content .oops-bookmark-btn.active {
+  border-color: #f59e0b !important;
+  color: #d97706 !important;
+  background: #fffbeb !important;
+}
+.app.theme-light .main-content.learn-content .oops-focus-btn:hover,
+.app.theme-light .main-content.learn-content .oops-focus-btn.active {
+  border-color: #2563eb !important;
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+}
+.app.theme-light .main-content.learn-content .learn-profile-btn {
+  background: #ffffff !important;
+  border-color: rgba(37, 99, 235, 0.28) !important;
+  color: #1e293b !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* Soften generic hero glow + auth gates */
+.app.theme-light .main-content.learn-content .oops-hero::before {
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.07) 0%,
+    transparent 70%
+  ) !important;
+}
+.app.theme-light .main-content.learn-content .oops-auth-gate,
+.app.theme-light .main-content.learn-content .oops-auth-gate-hub {
+  background: #eff6ff !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+}
+.app.theme-light .main-content.learn-content .oops-auth-gate p {
+  color: #334155 !important;
+}
+.app.theme-light .main-content.learn-content .oops-auth-gate-btn {
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+  background: #ffffff !important;
+}
+.app.theme-light .main-content.learn-content .oops-auth-gate-btn-primary {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: #ffffff !important;
+}
+

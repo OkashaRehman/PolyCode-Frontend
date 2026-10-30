@@ -1,0 +1,629 @@
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import Editor from "@monaco-editor/react";
+import { useAuth } from "../../../auth/context/AuthContext";
+import { useSiteMonacoTheme } from "../../../../shared/hooks/useSiteMonacoTheme";
+import { getVSCodeEditorOptions } from "../../../../shared/utils/monacoTheme";
+import {
+  formatPythonOutput,
+  getPythonRuntimeError,
+  runPythonCode,
+} from "../../shared/runPython";
+import ChallengeCompleteCelebration from "../../shared/ChallengeCompleteCelebration";
+import { useChallengeCelebration } from "../../shared/useChallengeCelebration";
+import { useChallengeTelemetry } from "../../shared/challengeTelemetry";
+import PythonRunOutput from "../../shared/PythonRunOutput";
+import PolyGuardPanel from "../../../polyguard/components/PolyGuardPanel";
+import { buildRuntimeFailureResults } from "../../shared/buildRuntimeTestResults";
+
+function normalizeWhitespace(value = "") {
+  return value.replace(/\s+/g, "");
+}
+
+/** Curriculum challenges often omit `id` — still need a per-lesson key to reset UI. */
+function getChallengeKey(challenge = {}) {
+  if (challenge.id != null && String(challenge.id).trim()) {
+    return String(challenge.id);
+  }
+  return [
+    challenge.title || "",
+    challenge.starterCode || "",
+    challenge.solutionCode || "",
+  ].join("\u0000");
+}
+
+function acceptanceTestsPassed(tests = []) {
+  return tests
+    .filter((test) => test.id !== "runtime")
+    .every((test) => test.passed);
+}
+
+function testPasses(test, code, solutionCode) {
+  const keywords =
+    test.keywords || extractKeywords(solutionCode, test.id, [test]);
+  if (!keywords.length) return true;
+
+  return keywords.every((keyword) => {
+    if (typeof keyword === "string") {
+      return (
+        code.includes(keyword) ||
+        normalizeWhitespace(code).includes(normalizeWhitespace(keyword))
+      );
+    }
+    if (keyword?.pattern) {
+      return new RegExp(keyword.pattern, keyword.flags || "").test(code);
+    }
+    return true;
+  });
+}
+
+function extractKeywords(solutionCode, testId, tests) {
+  const explicit = tests.find((test) => test.id === testId)?.keywords;
+  if (explicit?.length) return explicit;
+
+  const lines = solutionCode
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"));
+
+  switch (testId) {
+    case 1:
+      if (lines.some((line) => /import\s+numpy/.test(line))) {
+        return [{ pattern: "import\\s+numpy\\s+as\\s+np" }];
+      }
+      return [{ pattern: "np\\.array\\s*\\(" }];
+    case 2:
+      if (lines.some((line) => /\+\s*100/.test(line))) {
+        return [{ pattern: "\\+\\s*100" }];
+      }
+      return [{ pattern: "np\\.array\\s*\\(" }];
+    case 3:
+      return [{ pattern: "print\\s*\\(" }];
+    default:
+      return lines[testId - 1] ? [lines[testId - 1]] : [];
+  }
+}
+
+export default function PythonCodeChallenge({
+  challenge,
+  accentColor,
+  isCompleted,
+  onComplete,
+  initialCode,
+  onCodeChange,
+}) {
+  const { loading: authLoading, isAuthenticated } = useAuth();
+  const { monacoTheme, beforeMount } = useSiteMonacoTheme();
+  const canRun = isAuthenticated && !authLoading;
+  const reportChallengeResult = useChallengeTelemetry();
+
+  const challengeKey = getChallengeKey(challenge);
+  const [code, setCode] = useState(initialCode || challenge.starterCode);
+  const [results, setResults] = useState(null);
+  const [output, setOutput] = useState(null);
+  const [showSolution, setShowSolution] = useState(false);
+  // Read by the editor's onChange: Monaco fires it with the solution text when
+  // swapping it in, before the handler closure sees showSolution=true.
+  const showSolutionRef = useRef(false);
+  showSolutionRef.current = showSolution;
+  const [running, setRunning] = useState(false);
+  const [submitGeneration, setSubmitGeneration] = useState(0);
+  const activeChallengeKey = useRef(challengeKey);
+  const runTestsRef = useRef(null);
+  const runTimerRef = useRef(null);
+  const { showCelebration, triggerCelebration, dismissCelebration } =
+    useChallengeCelebration(challengeKey);
+
+  useEffect(() => {
+    const challengeChanged = activeChallengeKey.current !== challengeKey;
+    if (challengeChanged) {
+      activeChallengeKey.current = challengeKey;
+      setCode(
+        typeof initialCode === "string" ? initialCode : challenge.starterCode,
+      );
+      setResults(null);
+      setOutput(null);
+      setShowSolution(false);
+      setSubmitGeneration(0);
+      return;
+    }
+
+    // Same challenge: apply saved code once it arrives from the server.
+    if (typeof initialCode === "string") {
+      setCode((currentCode) =>
+        !currentCode || currentCode === challenge.starterCode
+          ? initialCode
+          : currentCode,
+      );
+    }
+  }, [challengeKey, challenge.starterCode, initialCode]);
+
+  const stopRunTimer = useCallback(() => {
+    if (runTimerRef.current) {
+      window.clearInterval(runTimerRef.current);
+      runTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => stopRunTimer, [stopRunTimer]);
+
+  function startRunTimer(message) {
+    stopRunTimer();
+    const startedAt = Date.now();
+    setOutput({ status: "running", stdout: message });
+    runTimerRef.current = window.setInterval(() => {
+      const seconds = Math.round((Date.now() - startedAt) / 1000);
+      if (seconds < 6) return;
+      setOutput({
+        status: "running",
+        stdout: `${message} (${seconds}s)\n\nThe first run downloads the Python runtime, so it can take up to a minute.`,
+      });
+    }, 1000);
+  }
+
+  function runTests() {
+    if (!canRun || running || showSolution) return;
+
+    setRunning(true);
+    setResults(null);
+
+    const keywordsOnly = challenge.gradeMode === "keywords";
+
+    if (keywordsOnly) {
+      setOutput({
+        status: "running",
+        stdout: "Checking code patterns…",
+      });
+
+      window.setTimeout(() => {
+        const testResults = challenge.tests.map((test) => ({
+          ...test,
+          passed: testPasses(test, code, challenge.solutionCode),
+        }));
+        const allPassed = acceptanceTestsPassed(testResults);
+
+        setResults({ passed: allPassed, tests: testResults });
+        setOutput({
+          status: allPassed ? "pass" : "fail",
+          stdout: allPassed
+            ? "Pattern checks passed (browser deep-learning libs are graded by code patterns)."
+            : "Some pattern checks failed. Match the required APIs from the lesson.",
+        });
+
+        if (allPassed) {
+          reportChallengeResult?.(true);
+          triggerCelebration();
+          if (!isCompleted) {
+            Promise.resolve(onComplete()).catch((error) => {
+              console.error("Unable to save lesson progress:", error);
+            });
+          }
+        } else {
+          reportChallengeResult?.(false);
+        }
+
+        setRunning(false);
+        setSubmitGeneration((value) => value + 1);
+      }, 400);
+      return;
+    }
+
+    startRunTimer("Running Python checks…");
+
+    window.setTimeout(async () => {
+      // Run the reference solution alongside the learner's code instead of
+      // before it, and never let it hold up the verdict.
+      const expectedPromise = Promise.race([
+        runPythonCode(challenge.solutionCode)
+          .then((expectedRun) => formatPythonOutput(expectedRun.result))
+          .catch(() => ""),
+        new Promise((resolve) => window.setTimeout(() => resolve(""), 20000)),
+      ]);
+
+      let runPayload;
+      let expectedOutput = "";
+      try {
+        runPayload = await runPythonCode(code);
+        expectedOutput = await expectedPromise;
+        stopRunTimer();
+      } catch (error) {
+        expectedOutput = await expectedPromise;
+        stopRunTimer();
+        const failureResults = buildRuntimeFailureResults(
+          challenge,
+          code,
+          challenge.solutionCode,
+          testPasses,
+          {
+            runtimeLabel: "Python runs without errors",
+            runtimeHint: error.message || "Could not run Python.",
+          },
+        );
+        const keywordsOk = acceptanceTestsPassed(failureResults.tests);
+        setResults({
+          ...failureResults,
+          // Lesson goals are keyword checks — still allow completion if those pass.
+          passed: keywordsOk,
+        });
+        setOutput({
+          status: keywordsOk ? "pass" : "fail",
+          stdout: keywordsOk
+            ? `${error.message || "Runtime warning"}\n\nCode checks passed — lesson marked complete. Fix the runtime message if you want clean output.`
+            : error.message || "Run failed",
+          expected: expectedOutput,
+        });
+        if (keywordsOk) {
+          reportChallengeResult?.(true);
+          triggerCelebration();
+          if (!isCompleted) {
+            Promise.resolve(onComplete()).catch((err) => {
+              console.error("Unable to save lesson progress:", err);
+            });
+          }
+        } else {
+          reportChallengeResult?.(false);
+        }
+        setRunning(false);
+        setSubmitGeneration((value) => value + 1);
+        return;
+      }
+
+      const { result: runResult, runtime } = runPayload;
+      const runtimeError = getPythonRuntimeError(runResult);
+
+      const stdout = formatPythonOutput(runResult);
+
+      if (runtimeError) {
+        const failureResults = buildRuntimeFailureResults(
+          challenge,
+          code,
+          challenge.solutionCode,
+          testPasses,
+          {
+            runtimeLabel: "Python runs without errors",
+            runtimeHint: "Fix the error in Output, then run again.",
+          },
+        );
+        const keywordsOk = acceptanceTestsPassed(failureResults.tests);
+        setResults({
+          ...failureResults,
+          passed: keywordsOk,
+        });
+        setOutput({
+          status: keywordsOk ? "pass" : "fail",
+          stdout: keywordsOk
+            ? `${runtimeError}\n\nCode checks passed — lesson marked complete. Fix the runtime message if you want clean output.`
+            : runtimeError,
+          expected: expectedOutput,
+        });
+        if (keywordsOk) {
+          reportChallengeResult?.(true);
+          triggerCelebration();
+          if (!isCompleted) {
+            Promise.resolve(onComplete()).catch((err) => {
+              console.error("Unable to save lesson progress:", err);
+            });
+          }
+        } else {
+          reportChallengeResult?.(false);
+        }
+        setRunning(false);
+        setSubmitGeneration((value) => value + 1);
+        return;
+      }
+
+      const testResults = challenge.tests.map((test) => ({
+        ...test,
+        passed: testPasses(test, code, challenge.solutionCode),
+      }));
+
+      const allPassed = acceptanceTestsPassed(testResults);
+
+      setResults({ passed: allPassed, tests: testResults });
+      setOutput({
+        status: allPassed ? "pass" : "fail",
+        stdout:
+          stdout ||
+          (runResult.plotImages?.length
+            ? `Rendered ${runResult.plotImages.length} chart${runResult.plotImages.length > 1 ? "s" : ""}.`
+            : runtime === "server"
+              ? "Program ran on server (no printed output)."
+              : "Program ran in browser (no printed output)."),
+        plotImages: runResult.plotImages || [],
+        expected: expectedOutput,
+      });
+
+      if (allPassed) {
+        reportChallengeResult?.(true);
+        triggerCelebration();
+        if (!isCompleted) {
+          Promise.resolve(onComplete()).catch((error) => {
+            console.error("Unable to save lesson progress:", error);
+          });
+        }
+      } else {
+        reportChallengeResult?.(false);
+      }
+
+      setRunning(false);
+      setSubmitGeneration((value) => value + 1);
+    }, 600);
+  }
+
+  useEffect(() => {
+    runTestsRef.current = runTests;
+  });
+
+  function handleEditorMount(editor, monaco) {
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      if (canRun) runTestsRef.current?.();
+    });
+  }
+
+  function resetCode() {
+    setCode(challenge.starterCode);
+    onCodeChange?.(challenge.starterCode);
+    setResults(null);
+    setOutput(null);
+    setShowSolution(false);
+  }
+
+  return (
+    <div className="oops-challenge">
+      <ChallengeCompleteCelebration
+        show={showCelebration}
+        onDismiss={dismissCelebration}
+      />
+      <div className="oops-problem-panel">
+        <div className="oops-problem-header">
+          <h3 className="oops-problem-title">{challenge.title}</h3>
+          {canRun && isCompleted && (
+            <span
+              className="oops-problem-solved"
+              style={{ color: accentColor }}
+            >
+              ✓ Solved
+            </span>
+          )}
+        </div>
+        {challenge.gradeMode === "keywords" && (
+          <p
+            className="oops-problem-desc"
+            style={{ marginBottom: 10, opacity: 0.85, fontSize: "0.86rem" }}
+          >
+            Pattern checks only — PyTorch is not executed in the browser. Match
+            the required APIs from the lesson to pass.
+          </p>
+        )}
+        {Array.isArray(challenge.description) ? (
+          <div className="oops-problem-desc">
+            {challenge.description.map((block, i) => {
+              if (block.type === "text")
+                return (
+                  <p key={i} style={{ marginBottom: "10px" }}>
+                    {block.content}
+                  </p>
+                );
+              if (block.type === "code")
+                return (
+                  <pre
+                    key={i}
+                    style={{
+                      background: "rgba(0,0,0,0.3)",
+                      padding: "10px 14px",
+                      borderRadius: "7px",
+                      fontSize: "0.82rem",
+                      margin: "8px 0",
+                      overflowX: "auto",
+                    }}
+                  >
+                    <code>{block.content}</code>
+                  </pre>
+                );
+              if (block.type === "callout")
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      borderLeft: "3px solid #ffe566",
+                      padding: "8px 12px",
+                      background: "rgba(184,255,0,0.06)",
+                      borderRadius: "6px",
+                      margin: "8px 0",
+                      fontSize: "0.86rem",
+                    }}
+                  >
+                    {block.content}
+                  </div>
+                );
+              if (block.type === "expected")
+                return (
+                  <div key={i} style={{ marginTop: "10px" }}>
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        color: "#6e7891",
+                        textTransform: "uppercase",
+                        fontWeight: 700,
+                        letterSpacing: "0.08em",
+                      }}
+                    >
+                      {block.label}
+                    </span>
+                    <pre
+                      style={{
+                        background: "rgba(0,0,0,0.3)",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        fontSize: "0.82rem",
+                        marginTop: "5px",
+                      }}
+                    >
+                      <code>{block.content}</code>
+                    </pre>
+                  </div>
+                );
+              return null;
+            })}
+          </div>
+        ) : (
+          <p className="oops-problem-desc">{challenge.description}</p>
+        )}
+
+        {!canRun && (
+          <div className="oops-auth-gate">
+            <p>
+              You can write code in the editor. Sign in or create an account to
+              run, submit, save progress, and mark lessons complete.
+            </p>
+            <div className="oops-auth-gate-actions">
+              <Link to="/login" className="oops-auth-gate-btn">
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="oops-auth-gate-btn oops-auth-gate-btn-primary"
+              >
+                Sign up
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <div className="oops-test-cases">
+          <div className="oops-test-cases-label">Acceptance Tests</div>
+          {(results ? results.tests : challenge.tests).map((t) => (
+            <div
+              key={t.id}
+              className={`oops-test-row ${
+                results ? (t.passed ? "oops-test-pass" : "oops-test-fail") : ""
+              }`}
+            >
+              <span className="oops-test-icon">
+                {results ? (t.passed ? "✓" : "✗") : "○"}
+              </span>
+              <span className="oops-test-label">{t.label}</span>
+              {results && !t.passed && t.hint && (
+                <span className="oops-test-hint">Hint: {t.hint}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={`oops-output-panel ${
+            output?.status ? `oops-output-${output.status}` : ""
+          }`}
+        >
+          <div className="oops-output-head">
+            <span>Output</span>
+            <small>{output ? "after last run" : "waiting for run"}</small>
+          </div>
+          <PythonRunOutput
+            stdout={output?.stdout}
+            plotImages={output?.plotImages}
+            emptyHint="Run your code to see output here."
+          />
+          {output?.expected && (
+            <div className="oops-expected-output">
+              <span>Expected</span>
+              <code>{output.expected}</code>
+            </div>
+          )}
+        </div>
+
+        <div className="polyguard-learn-wrap">
+          <PolyGuardPanel
+            code={showSolution ? challenge.solutionCode : code}
+            language="python"
+            variant="learn"
+            disabled={!canRun || showSolution}
+            resetKey={`${challengeKey}:${showSolution ? "solution" : "code"}`}
+            autoRunKey={submitGeneration || null}
+            hideManualTrigger
+            analysisContext={{
+              coachMode: true,
+              lessonTitle: challenge.title,
+              testResults: results,
+              runtimeError:
+                output?.status === "fail" ? output?.stdout : "",
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="oops-editor-panel">
+        <div className="oops-editor-topbar">
+          <span className="oops-editor-lang">Python · lesson.py</span>
+          <div className="oops-editor-actions">
+            <button
+              type="button"
+              className="oops-editor-action"
+              onClick={resetCode}
+            >
+              ↺ Reset
+            </button>
+            <button
+              type="button"
+              className="oops-editor-action"
+              onClick={() => setShowSolution(!showSolution)}
+              disabled={!canRun}
+            >
+              {showSolution ? "Hide Solution" : "Solution"}
+            </button>
+          </div>
+        </div>
+
+        <div className="oops-editor">
+          <Editor
+            height="100%"
+            language="python"
+            value={showSolution ? challenge.solutionCode : code}
+            beforeMount={beforeMount}
+            onMount={handleEditorMount}
+            theme={monacoTheme}
+            onChange={(value) => {
+              if (!showSolutionRef.current) {
+                const next = value || "";
+                setCode(next);
+                if (isAuthenticated) onCodeChange?.(next);
+              }
+            }}
+            options={getVSCodeEditorOptions({
+              fontSize: 14,
+              readOnly: showSolution,
+            })}
+          />
+        </div>
+
+        <div className="oops-run-bar">
+          {results && (
+            <div
+              className={`oops-verdict ${results.passed ? "oops-verdict-pass" : "oops-verdict-fail"}`}
+            >
+              {results.passed
+                ? "✓ All tests passed!"
+                : `${results.tests.filter((t) => t.passed && t.id !== "runtime").length}/${challenge.tests.length} code checks passed`}
+            </div>
+          )}
+          <button
+            type="button"
+            className="oops-run-btn"
+            style={{ "--accent": accentColor }}
+            onClick={runTests}
+            disabled={!canRun || running || showSolution}
+            title={!canRun ? "Sign in or sign up to run and submit" : undefined}
+          >
+            {authLoading
+              ? "Checking sign-in…"
+              : running
+                ? "⟳ Running…"
+                : canRun
+                  ? "▶ Run & Submit"
+                  : "Sign in to run & submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

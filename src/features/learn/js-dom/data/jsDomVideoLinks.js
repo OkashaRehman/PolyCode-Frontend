@@ -1,0 +1,17 @@
+export const JS_DOM_VIDEO_LINKS = {
+  "jsdom-0": "",
+  "jsdom-1": "",
+  "jsdom-2": "",
+  "jsdom-3": "",
+  "jsdom-4": "",
+  "jsdom-5": "",
+  "jsdom-6": "",
+  "jsdom-7": "",
+  "jsdom-8": "",
+  "jsdom-9": "",
+  "jsdom-10": "",
+  "jsdom-11": "",
+  "jsdom-12": "",
+  "jsdom-13": "",
+  "jsdom-14": "",
+};

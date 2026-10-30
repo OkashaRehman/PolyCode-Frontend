@@ -4,27 +4,39 @@
   "private": true,
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@ruby/3.4-wasm-wasi": "^2.9.3-2.9.4",
+    "@ruby/wasm-wasi": "^2.9.3-2.9.4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^13.5.0",
+    "@vercel/analytics": "^2.0.1",
     "axios": "^1.13.6",
     "framer-motion": "^12.36.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.577.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-easy-crop": "^5.5.7",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.13.1",
     "react-scripts": "5.0.1",
     "react-syntax-highlighter": "^16.1.1",
     "remark-gfm": "^4.0.1",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "prestart": "node scripts/check-required-deps.js && node scripts/copy-ruby-wasm.js",
+    "prebuild": "node scripts/check-required-deps.js && node scripts/copy-ruby-wasm.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "audit:learn-courses": "node scripts/audit-learn-courses.mjs"
   },
   "eslintConfig": {
     "extends": [

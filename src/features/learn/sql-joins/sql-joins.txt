@@ -1,0 +1,1516 @@
+================================================================================
+START OF FOLDER: sql-joins
+================================================================================
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+Root: C:\Users\Sheikh\Desktop\QL\polycode frontend\PolyCode-Frontend\src\features\learn\sql-joins
+
+sql-joins/
+├── components/
+│   └── SqlJoinsCodeChallenge.jsx
+├── data/
+│   └── sqlJoinsCurriculum.js
+├── hooks/
+│   └── useSqlJoinsProgress.js
+└── pages/
+    ├── SqlJoinsHub.jsx
+    └── SqlJoinsLessonPage.jsx
+
+Total files: 5
+
+================================================================================
+FILE CONTENTS
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: /components/SqlJoinsCodeChallenge.jsx
+--------------------------------------------------------------------------------
+import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import Editor from "@monaco-editor/react";
+import { useAuth } from "../../../auth/context/AuthContext";
+import {
+  getVSCodeEditorOptions,
+} from "../../../../shared/utils/monacoTheme";
+import { useSiteMonacoTheme } from "../../../../shared/hooks/useSiteMonacoTheme";
+import {
+  formatSqlOutput,
+  getSqlRuntimeError,
+  runSqlCode,
+} from "../../shared/runSql";
+import ChallengeCompleteCelebration from "../../shared/ChallengeCompleteCelebration";
+import { useChallengeCelebration } from "../../shared/useChallengeCelebration";
+import PolyGuardPanel from "../../../polyguard/components/PolyGuardPanel";
+import { buildRuntimeFailureResults } from "../../shared/buildRuntimeTestResults";
+
+function normalizeWhitespace(value = "") {
+  return value.replace(/\s+/g, "");
+}
+
+function testPasses(test, code) {
+  const keywords = test.keywords || [];
+  if (!keywords.length) return true;
+
+  return keywords.every((keyword) => {
+    if (typeof keyword === "string") {
+      return (
+        code.includes(keyword) ||
+        normalizeWhitespace(code).includes(normalizeWhitespace(keyword))
+      );
+    }
+    if (keyword?.pattern) {
+      return new RegExp(keyword.pattern, keyword.flags || "").test(code);
+    }
+    return true;
+  });
+}
+
+export default function SqlJoinsCodeChallenge({
+  challenge,
+  accentColor,
+  isCompleted,
+  onComplete,
+  initialCode,
+  onCodeChange,
+}) {
+  const { loading: authLoading, isAuthenticated } = useAuth();
+  const canRun = isAuthenticated && !authLoading;
+
+  const [code, setCode] = useState(initialCode || challenge.starterCode || "");
+  const [results, setResults] = useState(null);
+  const [output, setOutput] = useState(null);
+  const [showSolution, setShowSolution] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [submitGeneration, setSubmitGeneration] = useState(0);
+  const activeChallengeId = useRef(challenge.id);
+  const runTestsRef = useRef(null);
+  const { showCelebration, triggerCelebration, dismissCelebration } =
+    useChallengeCelebration(challenge.id);
+  const { monacoTheme, beforeMount } = useSiteMonacoTheme();
+
+  useEffect(() => {
+    const challengeChanged = activeChallengeId.current !== challenge.id;
+    if (challengeChanged) {
+      activeChallengeId.current = challenge.id;
+      setCode(initialCode || challenge.starterCode || "");
+      setResults(null);
+      setOutput(null);
+      setShowSolution(false);
+      setSubmitGeneration(0);
+      return;
+    }
+
+    if (typeof initialCode === "string") {
+      setCode((currentCode) =>
+        currentCode === (challenge.starterCode || "") ? initialCode : currentCode,
+      );
+    }
+  }, [challenge.id, challenge.starterCode, initialCode]);
+
+  function runTests() {
+    if (!canRun || running || showSolution) return;
+
+    setRunning(true);
+    setResults(null);
+    setOutput({
+      status: "running",
+      stdout: "Running SQL query…",
+    });
+
+    window.setTimeout(async () => {
+      let expectedOutput = "";
+      try {
+        const expectedRun = await runSqlCode(challenge.solutionCode || "");
+        expectedOutput = formatSqlOutput(expectedRun);
+      } catch {
+        expectedOutput = "";
+      }
+
+      let runPayload;
+      try {
+        runPayload = await runSqlCode(code);
+      } catch (error) {
+        setResults(
+          buildRuntimeFailureResults(
+            challenge,
+            code,
+            challenge.solutionCode || "",
+            testPasses,
+            {
+              runtimeLabel: "SQL runs without errors",
+              runtimeHint: error.message || "Could not run SQL.",
+            },
+          ),
+        );
+        setOutput({
+          status: "fail",
+          stdout: error.message || "Run failed",
+          expected: expectedOutput,
+        });
+        setRunning(false);
+        setSubmitGeneration((value) => value + 1);
+        return;
+      }
+
+      const runtimeError = getSqlRuntimeError(runPayload);
+      const stdout = formatSqlOutput(runPayload);
+
+      if (runtimeError) {
+        setResults(
+          buildRuntimeFailureResults(
+            challenge,
+            code,
+            challenge.solutionCode || "",
+            testPasses,
+            {
+              runtimeLabel: "SQL runs without errors",
+              runtimeHint: "Fix the error in Output, then run again.",
+            },
+          ),
+        );
+        setOutput({
+          status: "fail",
+          stdout: runtimeError,
+          expected: expectedOutput,
+        });
+        setRunning(false);
+        setSubmitGeneration((value) => value + 1);
+        return;
+      }
+
+      const testList = challenge.tests || [];
+      const testResults = testList.map((test) => ({
+        ...test,
+        passed: testPasses(test, code),
+      }));
+
+      const allPassed = testResults.length > 0 ? testResults.every((test) => test.passed) : true;
+
+      setResults({ passed: allPassed, tests: testResults });
+      setOutput({
+        status: allPassed ? "pass" : "fail",
+        stdout: stdout || "Query executed.",
+        expected: expectedOutput,
+      });
+
+      if (allPassed) {
+        triggerCelebration();
+        if (!isCompleted) {
+          Promise.resolve(onComplete()).catch((error) => {
+            console.error("Unable to save lesson progress:", error);
+          });
+        }
+      }
+
+      setRunning(false);
+      setSubmitGeneration((value) => value + 1);
+    }, 600);
+  }
+
+  useEffect(() => {
+    runTestsRef.current = runTests;
+  });
+
+  function handleEditorMount(editor, monaco) {
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      if (canRun) runTestsRef.current?.();
+    });
+  }
+
+  function resetCode() {
+    setCode(challenge.starterCode || "");
+    onCodeChange?.(challenge.starterCode || "");
+    setResults(null);
+    setOutput(null);
+    setShowSolution(false);
+  }
+
+  return (
+    <div className="oops-challenge">
+      <ChallengeCompleteCelebration
+        show={showCelebration}
+        onDismiss={dismissCelebration}
+      />
+      <div className="oops-problem-panel">
+        <div className="oops-problem-header">
+          <h3 className="oops-problem-title">{challenge.title}</h3>
+          {canRun && isCompleted && (
+            <span
+              className="oops-problem-solved"
+              style={{ color: accentColor }}
+            >
+              ✓ Solved
+            </span>
+          )}
+        </div>
+        {Array.isArray(challenge.description) ? (
+          <div className="oops-problem-desc">
+            {challenge.description.map((block, i) => {
+              if (block.type === "text")
+                return (
+                  <p key={i} style={{ marginBottom: "10px" }}>
+                    {block.content}
+                  </p>
+                );
+              if (block.type === "code")
+                return (
+                  <pre
+                    key={i}
+                    style={{
+                      background: "rgba(0,0,0,0.3)",
+                      padding: "10px 14px",
+                      borderRadius: "7px",
+                      fontSize: "0.82rem",
+                      margin: "8px 0",
+                      overflowX: "auto",
+                    }}
+                  >
+                    <code>{block.content}</code>
+                  </pre>
+                );
+              return null;
+            })}
+          </div>
+        ) : (
+          <p className="oops-problem-desc">{challenge.description}</p>
+        )}
+
+        {!canRun && (
+          <div className="oops-auth-gate">
+            <p>
+              You can write code in the editor. Sign in or create an account to
+              run, submit, save progress, and mark lessons complete.
+            </p>
+            <div className="oops-auth-gate-actions">
+              <Link to="/login" className="oops-auth-gate-btn">
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="oops-auth-gate-btn oops-auth-gate-btn-primary"
+              >
+                Sign up
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <div className="oops-test-cases">
+          <div className="oops-test-cases-label">Acceptance Tests</div>
+          {(results ? results.tests : (challenge.tests || [])).map((t) => (
+            <div
+              key={t.id || t.label}
+              className={`oops-test-row ${
+                results ? (t.passed ? "oops-test-pass" : "oops-test-fail") : ""
+              }`}
+            >
+              <span className="oops-test-icon">
+                {results ? (t.passed ? "✓" : "✗") : "○"}
+              </span>
+              <span className="oops-test-label">{t.label || t.testCode}</span>
+              {results && !t.passed && t.hint && (
+                <span className="oops-test-hint">Hint: {t.hint}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={`oops-output-panel ${
+            output?.status ? `oops-output-${output.status}` : ""
+          }`}
+        >
+          <div className="oops-output-head">
+            <span>Output</span>
+            <small>{output ? "after last run" : "waiting for run"}</small>
+          </div>
+          <pre className="oops-output-body">
+            {output?.stdout || "Run your query to see output here."}
+          </pre>
+          <PolyGuardPanel
+            code={showSolution ? (challenge.solutionCode || "") : code}
+            language="sql"
+            variant="learn"
+            disabled={!canRun || showSolution}
+            resetKey={`${challenge.id}:${showSolution ? "solution" : "code"}`}
+            autoRunKey={submitGeneration || null}
+            hideManualTrigger
+            analysisContext={{
+              testResults: results,
+              runtimeError:
+                output?.status === "fail" ? output?.stdout : "",
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="oops-editor-panel">
+        <div className="oops-editor-topbar">
+          <span className="oops-editor-lang">SQL · query.sql</span>
+          <div className="oops-editor-actions">
+            <button
+              type="button"
+              className="oops-editor-action"
+              onClick={resetCode}
+            >
+              ↺ Reset
+            </button>
+            <button
+              type="button"
+              className="oops-editor-action"
+              onClick={() => setShowSolution(!showSolution)}
+              disabled={!canRun}
+            >
+              {showSolution ? "Hide Solution" : "Solution"}
+            </button>
+          </div>
+        </div>
+
+        <div className="oops-editor">
+          <Editor
+            height="100%"
+            language="sql"
+            value={showSolution ? (challenge.solutionCode || "") : code}
+            beforeMount={beforeMount}
+            onMount={handleEditorMount}
+            theme={monacoTheme}
+            onChange={(value) => {
+              if (!showSolution) {
+                const next = value || "";
+                setCode(next);
+                if (isAuthenticated) onCodeChange?.(next);
+              }
+            }}
+            options={getVSCodeEditorOptions({
+              fontSize: 14,
+              readOnly: showSolution,
+            })}
+          />
+        </div>
+
+        <div className="oops-run-bar">
+          {results && (
+            <div
+              className={`oops-verdict ${results.passed ? "oops-verdict-pass" : "oops-verdict-fail"}`}
+            >
+              {results.passed
+                ? "✓ All tests passed!"
+                : `${results.tests.filter((t) => t.passed).length}/${(challenge.tests || []).length} tests passed`}
+            </div>
+          )}
+          <button
+            type="button"
+            className="oops-run-btn"
+            style={{ "--accent": accentColor }}
+            onClick={runTests}
+            disabled={!canRun || running || showSolution}
+            title={!canRun ? "Sign in or sign up to run and submit" : undefined}
+          >
+            {authLoading
+              ? "Checking sign-in…"
+              : running
+                ? "⟳ Running…"
+                : canRun
+                  ? "▶ Run & Submit"
+                  : "Sign in to run & submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /data/sqlJoinsCurriculum.js
+--------------------------------------------------------------------------------
+export const SQLJOINS_CHAPTERS = [
+  {
+    id: "chapter-1",
+    title: "Relational Concepts",
+    icon: "🔗",
+    color: "#f29111",
+    lessons: [
+      {
+        id: "lesson-1",
+        title: "Primary and Foreign Keys",
+        chapterTitle: "Relational Concepts",
+        xp: 15,
+        theory: [
+          {
+            type: "text",
+            content: "Before joining tables, you must understand how they relate. A **Primary Key** uniquely identifies each record in a table. A **Foreign Key** is a field (or collection of fields) in one table that refers to the Primary Key in another table.",
+          },
+          {
+            type: "callout",
+            variant: "info",
+            title: "Relational Example",
+            content: "In a `customers` table, `customer_id` is the Primary Key. In an `orders` table, the `customer_id` column is a Foreign Key that links back to the `customers` table."
+          }
+        ],
+        challenge: {
+          id: "challenge-1",
+          title: "Identify the Keys",
+          description: "Write a simple query to retrieve the primary key `id` and the foreign key `department_id` from the `employees` table for the employee named 'Alice'.",
+          starter: "SELECT \n  -- Select columns here\nFROM employees\nWHERE name = 'Alice';",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must select id and department_id",
+              dbState: {
+                employees: [
+                  { id: 1, name: "Alice", department_id: 101 },
+                  { id: 2, name: "Bob", department_id: 102 }
+                ]
+              },
+              expected: [
+                { id: 1, department_id: 101 }
+              ]
+            }
+          ],
+          keywords: ["SELECT", "id", "department_id", "FROM", "employees"]
+        }
+      },
+      {
+        id: "lesson-2",
+        title: "Introduction to JOINs",
+        chapterTitle: "Relational Concepts",
+        xp: 20,
+        theory: [
+          {
+            type: "text",
+            content: "A `JOIN` clause is used to combine rows from two or more tables, based on a related column between them."
+          },
+          {
+            type: "text",
+            content: "There are different types of JOINs in SQL:\n• `INNER JOIN` (Default): Returns records that have matching values in both tables.\n• `LEFT JOIN`: Returns all records from the left table, and the matched records from the right table.\n• `RIGHT JOIN`: Returns all records from the right table, and the matched records from the left table.\n• `FULL OUTER JOIN`: Returns all records when there is a match in either left or right table."
+          }
+        ],
+        challenge: {
+          id: "challenge-2",
+          title: "The ON Clause",
+          description: "When using a JOIN, you must specify the linking condition using the `ON` keyword. Write an `INNER JOIN` that links `orders` and `customers` where `orders.customer_id = customers.id`.",
+          starter: "SELECT orders.id, customers.name\nFROM orders\nINNER JOIN customers ON -- Add link here;",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must link using ON",
+              dbState: {
+                orders: [{ id: 1, customer_id: 1 }],
+                customers: [{ id: 1, name: "Alice" }]
+              },
+              expected: [
+                { id: 1, name: "Alice" }
+              ]
+            }
+          ],
+          keywords: ["INNER JOIN", "ON", "orders.customer_id", "=", "customers.id"]
+        }
+      }
+    ]
+  },
+  {
+    id: "chapter-2",
+    title: "Inner Joins",
+    icon: "🤝",
+    color: "#f29111",
+    lessons: [
+      {
+        id: "lesson-3",
+        title: "Basic INNER JOIN",
+        chapterTitle: "Inner Joins",
+        xp: 25,
+        theory: [
+          {
+            type: "text",
+            content: "The `INNER JOIN` keyword selects records that have matching values in both tables. If there is a record in the 'left' table that does not have a match in the 'right' table, that record will NOT be shown."
+          },
+          {
+            type: "code",
+            lang: "sql",
+            label: "Inner Join Syntax",
+            content: "SELECT orders.order_id, customers.customer_name\nFROM orders\nINNER JOIN customers ON orders.customer_id = customers.customer_id;"
+          }
+        ],
+        challenge: {
+          id: "challenge-3",
+          title: "Join Movies and Directors",
+          description: "Write an `INNER JOIN` query to select `movies.title` and `directors.name`. Join the `movies` and `directors` tables where `movies.director_id = directors.id`.",
+          starter: "-- Write your INNER JOIN query here\n",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must return matching movies and directors",
+              dbState: {
+                directors: [
+                  { id: 1, name: "Nolan" },
+                  { id: 2, name: "Spielberg" }
+                ],
+                movies: [
+                  { id: 101, title: "Inception", director_id: 1 },
+                  { id: 102, title: "Jurassic Park", director_id: 2 },
+                  { id: 103, title: "Unknown", director_id: 99 } // Will not match
+                ]
+              },
+              expected: [
+                { title: "Inception", name: "Nolan" },
+                { title: "Jurassic Park", name: "Spielberg" }
+              ]
+            }
+          ],
+          keywords: ["SELECT", "FROM", "INNER JOIN", "ON", "movies", "directors"]
+        }
+      },
+      {
+        id: "lesson-4",
+        title: "Table Aliasing",
+        chapterTitle: "Inner Joins",
+        xp: 20,
+        theory: [
+          {
+            type: "text",
+            content: "When joining tables, typing out the full table name repeatedly can get tedious. You can use Table Aliases (like Column Aliases) to assign a short temporary name to a table."
+          },
+          {
+            type: "code",
+            lang: "sql",
+            label: "Table Alias Example",
+            content: "SELECT o.order_id, c.customer_name\nFROM orders o\nINNER JOIN customers c ON o.customer_id = c.customer_id;"
+          }
+        ],
+        challenge: {
+          id: "challenge-4",
+          title: "Use Table Aliases",
+          description: "Rewrite the previous query using `m` as the alias for `movies` and `d` as the alias for `directors`. Return `m.title` and `d.name`.",
+          starter: "SELECT -- Use aliases here\nFROM movies m\nINNER JOIN directors d ON m.director_id = d.id;",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must use table aliases",
+              dbState: {
+                directors: [{ id: 1, name: "Nolan" }],
+                movies: [{ id: 101, title: "Inception", director_id: 1 }]
+              },
+              expected: [
+                { title: "Inception", name: "Nolan" }
+              ]
+            }
+          ],
+          keywords: ["m.title", "d.name", "m.director_id", "d.id"]
+        }
+      },
+      {
+        id: "lesson-5",
+        title: "Joining Three Tables",
+        chapterTitle: "Inner Joins",
+        xp: 35,
+        theory: [
+          {
+            type: "text",
+            content: "You can chain multiple `JOIN` clauses to join three, four, or even more tables in a single query."
+          },
+          {
+            type: "code",
+            lang: "sql",
+            label: "Three Table Join",
+            content: "SELECT o.order_id, c.customer_name, s.shipper_name\nFROM ((orders o\nINNER JOIN customers c ON o.customer_id = c.customer_id)\nINNER JOIN shippers s ON o.shipper_id = s.shipper_id);"
+          }
+        ],
+        challenge: {
+          id: "challenge-5",
+          title: "Join Three Tables",
+          description: "Join `students`, `enrollments`, and `courses`. Return `students.name` and `courses.title`. The `enrollments` table has `student_id` and `course_id`.",
+          starter: "-- Use aliases s, e, and c\n",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must join three tables",
+              dbState: {
+                students: [{ id: 1, name: "Alice" }],
+                courses: [{ id: 101, title: "Math 101" }],
+                enrollments: [{ student_id: 1, course_id: 101 }]
+              },
+              expected: [
+                { name: "Alice", title: "Math 101" }
+              ]
+            }
+          ],
+          keywords: ["INNER JOIN", "enrollments", "courses", "students"]
+        }
+      }
+    ]
+  },
+  {
+    id: "chapter-3",
+    title: "Outer Joins",
+    icon: "🧩",
+    color: "#f29111",
+    lessons: [
+      {
+        id: "lesson-6",
+        title: "LEFT JOIN",
+        chapterTitle: "Outer Joins",
+        xp: 30,
+        theory: [
+          {
+            type: "text",
+            content: "The `LEFT JOIN` keyword returns all records from the left table (table1), and the matched records from the right table (table2). The result is NULL from the right side, if there is no match."
+          },
+          {
+            type: "code",
+            lang: "sql",
+            label: "Left Join Syntax",
+            content: "SELECT customers.customer_name, orders.order_id\nFROM customers\nLEFT JOIN orders ON customers.customer_id = orders.customer_id;"
+          }
+        ],
+        challenge: {
+          id: "challenge-6",
+          title: "Find Unassigned Projects",
+          description: "List ALL `projects` and the `employees` assigned to them. Use a `LEFT JOIN` so that projects with no employees still show up (with NULL for employee). Return `projects.name` and `employees.name`.",
+          starter: "SELECT p.name, e.name\nFROM projects p\n-- Add LEFT JOIN here;\n",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must return projects even without employees",
+              dbState: {
+                projects: [
+                  { id: 1, name: "Project Alpha" },
+                  { id: 2, name: "Project Beta" }
+                ],
+                employees: [
+                  { id: 101, name: "Dave", project_id: 1 }
+                ]
+              },
+              expected: [
+                { name: "Project Alpha", name: "Dave" },
+                { name: "Project Beta", name: null }
+              ]
+            }
+          ],
+          keywords: ["LEFT JOIN", "employees", "ON"]
+        }
+      },
+      {
+        id: "lesson-7",
+        title: "RIGHT JOIN",
+        chapterTitle: "Outer Joins",
+        xp: 30,
+        theory: [
+          {
+            type: "text",
+            content: "The `RIGHT JOIN` keyword returns all records from the right table, and the matched records from the left table. It is the exact mirror image of the LEFT JOIN."
+          }
+        ],
+        challenge: {
+          id: "challenge-7",
+          title: "Right Join the Tables",
+          description: "Use a `RIGHT JOIN` to list all `employees` and their assigned `projects`. Return `projects.name` and `employees.name`. If an employee has no project, they should still appear.",
+          starter: "-- Write your RIGHT JOIN query here\n",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must use RIGHT JOIN",
+              dbState: {
+                projects: [
+                  { id: 1, name: "Project Alpha" }
+                ],
+                employees: [
+                  { id: 101, name: "Dave", project_id: 1 },
+                  { id: 102, name: "Eve", project_id: null }
+                ]
+              },
+              expected: [
+                { name: "Project Alpha", name: "Dave" },
+                { name: null, name: "Eve" }
+              ]
+            }
+          ],
+          keywords: ["RIGHT JOIN", "projects", "employees"]
+        }
+      },
+      {
+        id: "lesson-8",
+        title: "FULL OUTER JOIN",
+        chapterTitle: "Outer Joins",
+        xp: 35,
+        theory: [
+          {
+            type: "text",
+            content: "The `FULL OUTER JOIN` keyword returns all matching records from both tables whether the other table matches or not."
+          },
+          {
+            type: "callout",
+            variant: "warning",
+            title: "Performance",
+            content: "FULL OUTER JOINs can return very large result-sets and should be used cautiously!"
+          }
+        ],
+        challenge: {
+          id: "challenge-8",
+          title: "Full Outer Join",
+          description: "Write a `FULL OUTER JOIN` to select `customers.name` and `orders.amount`. Return all customers and all orders, regardless of whether they have a match.",
+          starter: "-- Write your FULL OUTER JOIN query here\n",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must return all from both sides",
+              dbState: {
+                customers: [{ id: 1, name: "Alice" }],
+                orders: [{ id: 101, amount: 50, customer_id: 1 }, { id: 102, amount: 20, customer_id: 99 }]
+              },
+              expected: [
+                { name: "Alice", amount: 50 },
+                { name: null, amount: 20 }
+              ]
+            }
+          ],
+          keywords: ["FULL OUTER JOIN", "ON"]
+        }
+      }
+    ]
+  },
+  {
+    id: "chapter-4",
+    title: "Advanced Joins",
+    icon: "🪢",
+    color: "#f29111",
+    lessons: [
+      {
+        id: "lesson-9",
+        title: "Self JOIN",
+        chapterTitle: "Advanced Joins",
+        xp: 40,
+        theory: [
+          {
+            type: "text",
+            content: "A self JOIN is a regular join, but the table is joined with itself. This is particularly useful for hierarchical data, such as a table of employees where each employee has a manager who is also an employee."
+          },
+          {
+            type: "code",
+            lang: "sql",
+            label: "Self Join Syntax",
+            content: "SELECT A.CustomerName AS CustomerName1, B.CustomerName AS CustomerName2\nFROM Customers A, Customers B\nWHERE A.CustomerID <> B.CustomerID;"
+          }
+        ],
+        challenge: {
+          id: "challenge-9",
+          title: "Find Managers",
+          description: "Write a Self Join on the `employees` table. The table has `id`, `name`, and `manager_id`. Return the employee's `name` (alias `employee_name`) and their manager's `name` (alias `manager_name`). Use `LEFT JOIN` so the CEO (no manager) is included.",
+          starter: "SELECT e.name AS employee_name, m.name AS manager_name\nFROM employees e\n-- Join the table to itself\n",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must perform a self join",
+              dbState: {
+                employees: [
+                  { id: 1, name: "Boss", manager_id: null },
+                  { id: 2, name: "Worker", manager_id: 1 }
+                ]
+              },
+              expected: [
+                { employee_name: "Boss", manager_name: null },
+                { employee_name: "Worker", manager_name: "Boss" }
+              ]
+            }
+          ],
+          keywords: ["LEFT JOIN", "employees m", "ON e.manager_id = m.id"]
+        }
+      },
+      {
+        id: "lesson-10",
+        title: "CROSS JOIN",
+        chapterTitle: "Advanced Joins",
+        xp: 35,
+        theory: [
+          {
+            type: "text",
+            content: "The `CROSS JOIN` keyword returns all records from both tables (Cartesian product). If you cross join a table of 5 rows with a table of 10 rows, you get 50 rows!"
+          },
+          {
+            type: "callout",
+            variant: "warning",
+            title: "No ON Clause",
+            content: "Unlike other JOINs, CROSS JOIN does not use an ON clause because it matches every row to every row."
+          }
+        ],
+        challenge: {
+          id: "challenge-10",
+          title: "Cartesian Product",
+          description: "Create a list of all possible combinations of `colors` and `sizes`. Return `colors.color` and `sizes.size`.",
+          starter: "SELECT colors.color, sizes.size\nFROM colors\n-- Add CROSS JOIN here;\n",
+          tests: [
+            {
+              id: "test-1",
+              description: "Must return cartesian product",
+              dbState: {
+                colors: [{ color: "Red" }, { color: "Blue" }],
+                sizes: [{ size: "Small" }, { size: "Large" }]
+              },
+              expected: [
+                { color: "Red", size: "Small" },
+                { color: "Red", size: "Large" },
+                { color: "Blue", size: "Small" },
+                { color: "Blue", size: "Large" }
+              ]
+            }
+          ],
+          keywords: ["CROSS JOIN", "sizes"]
+        }
+      }
+    ]
+  }
+];
+
+export const SQLJOINS_LESSONS = SQLJOINS_CHAPTERS.flatMap((chapter) =>
+  chapter.lessons.map((lesson) => ({
+    ...lesson,
+    chapterId: chapter.id,
+    chapterTitle: chapter.title,
+    chapterColor: chapter.color,
+    chapterIcon: chapter.icon,
+  }))
+);
+
+export const SQLJOINS_TOTAL_XP = SQLJOINS_LESSONS.reduce(
+  (total, lesson) => total + (lesson.xp || 0),
+  0
+);
+
+
+--------------------------------------------------------------------------------
+FILE: /hooks/useSqlJoinsProgress.js
+--------------------------------------------------------------------------------
+import { useCallback, useMemo, useState } from "react";
+import { useAuth } from "../../../auth/context/AuthContext";
+import { recordLessonXp } from "../../shared/recordLessonXp";
+
+const LOCAL_KEY = "sqljoins_progress";
+const LOCAL_CODE_KEY = "sqljoins_saved_code";
+const LOCAL_BOOKMARKS_KEY = "sqljoins_bookmarks";
+const LOCAL_LAST_KEY = "sqljoins_last_lesson";
+
+function readJson(key, fallback) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+  } catch {
+    return fallback;
+  }
+}
+
+export default function useSqlJoinsProgress() {
+  const { user, isAuthenticated, token } = useAuth();
+  const [localVersion, setLocalVersion] = useState(0);
+  const refreshLocal = useCallback(() => setLocalVersion((v) => v + 1), []);
+
+  const localSnapshot = useMemo(() => {
+    void localVersion;
+    return {
+      completed: readJson(LOCAL_KEY, {}),
+      savedCode: readJson(LOCAL_CODE_KEY, {}),
+      bookmarks: readJson(LOCAL_BOOKMARKS_KEY, []),
+    };
+  }, [localVersion]);
+
+  const completedMap = isAuthenticated ? localSnapshot.completed : {};
+  const savedCodeMap = isAuthenticated ? localSnapshot.savedCode : {};
+  const bookmarks = localSnapshot.bookmarks;
+  const lastLessonId = localStorage.getItem(LOCAL_LAST_KEY);
+
+  const completeLesson = useCallback(
+    async (lesson) => {
+      if (!isAuthenticated) return;
+      const current = readJson(LOCAL_KEY, {});
+      current[lesson.id] = { xp: lesson.xp, at: Date.now() };
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(current));
+      localStorage.setItem(LOCAL_LAST_KEY, lesson.id);
+      refreshLocal();
+      recordLessonXp(token, "sql-joins", lesson);
+    },
+    [isAuthenticated, refreshLocal, token],
+  );
+
+  const rememberLesson = useCallback(
+    async (lessonId) => {
+      localStorage.setItem(LOCAL_LAST_KEY, lessonId);
+      refreshLocal();
+    },
+    [refreshLocal],
+  );
+
+  const saveCode = useCallback(
+    async (lessonId, code) => {
+      if (!isAuthenticated) return;
+      const current = readJson(LOCAL_CODE_KEY, {});
+      current[lessonId] = code;
+      localStorage.setItem(LOCAL_CODE_KEY, JSON.stringify(current));
+      refreshLocal();
+    },
+    [isAuthenticated, refreshLocal],
+  );
+
+  const toggleBookmark = useCallback(
+    async (lessonId) => {
+      const current = readJson(LOCAL_BOOKMARKS_KEY, []);
+      const next = current.includes(lessonId)
+        ? current.filter((id) => id !== lessonId)
+        : [...current, lessonId];
+      localStorage.setItem(LOCAL_BOOKMARKS_KEY, JSON.stringify(next));
+      refreshLocal();
+    },
+    [refreshLocal],
+  );
+
+  const addTime = useCallback(async () => {}, []);
+
+  return {
+    user,
+    isAuthenticated,
+    syncState: isAuthenticated ? "local" : "guest",
+    remoteProgress: null,
+    completedMap,
+    savedCodeMap,
+    bookmarks,
+    lastLessonId,
+    completeLesson,
+    rememberLesson,
+    saveCode,
+    toggleBookmark,
+    addTime,
+  };
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /pages/SqlJoinsHub.jsx
+--------------------------------------------------------------------------------
+import React, { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  SQLJOINS_CHAPTERS,
+  SQLJOINS_LESSONS,
+  SQLJOINS_TOTAL_XP,
+} from "../data/sqlJoinsCurriculum";
+import useSqlJoinsProgress from "../hooks/useSqlJoinsProgress";
+import LearnChapterPathOverview from "../../shared/LearnChapterPathOverview";
+import LearnChapterGrid from "../../shared/LearnChapterGrid";
+
+const BASE_PATH = "/learn/sql-joins";
+
+function lessonPlainText(lesson) {
+  return lesson.theory
+    .filter((block) => block.type === "text" || block.type === "callout")
+    .map((block) => block.content.replace(/\*\*/g, "").replace(/`/g, ""))
+    .join(" ");
+}
+
+export default function SqlJoinsHub() {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const {
+    isAuthenticated,
+    completedMap: progress,
+    bookmarks,
+    lastLessonId,
+  } = useSqlJoinsProgress();
+
+  const completedCount = Object.keys(progress).length;
+  const earnedXP = SQLJOINS_LESSONS.filter((lesson) => progress[lesson.id]).reduce(
+    (sum, lesson) => sum + lesson.xp,
+    0,
+  );
+  const pct =
+    Math.round((completedCount / SQLJOINS_LESSONS.length) * 100) || 0;
+  const nextLesson =
+    SQLJOINS_LESSONS.find((lesson) => !progress[lesson.id]) ||
+    SQLJOINS_LESSONS[0];
+  const resumeLesson =
+    SQLJOINS_LESSONS.find((lesson) => lesson.id === lastLessonId) ||
+    nextLesson;
+  const completedChapters = SQLJOINS_CHAPTERS.filter((chapter) =>
+    chapter.lessons.every((lesson) => progress[lesson.id]),
+  ).length;
+  const bookmarkedLessons = bookmarks
+    .map((id) => SQLJOINS_LESSONS.find((lesson) => lesson.id === id))
+    .filter(Boolean);
+
+  const filteredLessons = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return SQLJOINS_LESSONS.filter((lesson) => {
+      const matchesQuery =
+        !query ||
+        lesson.title.toLowerCase().includes(query) ||
+        (lesson.chapterTitle && lesson.chapterTitle.toLowerCase().includes(query)) ||
+        lessonPlainText(lesson).toLowerCase().includes(query);
+      const matchesFilter =
+        filter === "all" ||
+        (filter === "todo" && !progress[lesson.id]) ||
+        (filter === "done" && progress[lesson.id]) ||
+        (filter === "bookmarked" && bookmarks.includes(lesson.id));
+      return matchesQuery && matchesFilter;
+    });
+  }, [bookmarks, filter, progress, search]);
+
+  return (
+    <div className="oops-hub cpp-fundamentals-hub">
+      <div className="oops-hero cpp-fundamentals-hero">
+        <Link
+          to="/language/SQL"
+          className="oops-back-btn"
+          style={{ marginBottom: "0.75rem", display: "inline-flex" }}
+        >
+          ← SQL courses
+        </Link>
+        <div className="oops-hero-badge">SQL · CORE TRACK</div>
+        <h1 className="oops-hero-title">
+          SQL Joins
+        </h1>
+        <p className="oops-hero-sub">
+          Master SQL Joins with interactive lessons and practical queries.
+        </p>
+
+        <div className="oops-hero-grid">
+          <div className="oops-xp-bar-wrap">
+            <div className="oops-xp-meta">
+              <span>
+                {isAuthenticated
+                  ? `${completedCount}/${SQLJOINS_LESSONS.length} lessons · ${earnedXP}/${SQLJOINS_TOTAL_XP} XP`
+                  : `Sign in to track progress · ${SQLJOINS_LESSONS.length} lessons`}
+              </span>
+              <span>{isAuthenticated ? `${pct}%` : "—"}</span>
+            </div>
+            <div className="oops-xp-track">
+              <div
+                className="oops-xp-fill"
+                style={{ width: isAuthenticated ? `${pct}%` : "0%" }}
+              />
+            </div>
+          </div>
+
+          {!isAuthenticated && (
+            <div className="oops-auth-gate oops-auth-gate-hub">
+              <p>
+                Create a free account to run SQL challenges, earn XP, and save
+                your place in the course.
+              </p>
+              <div className="oops-auth-gate-actions">
+                <Link to="/login" className="oops-auth-gate-btn">
+                  Sign in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="oops-auth-gate-btn oops-auth-gate-btn-primary"
+                >
+                  Sign up
+                </Link>
+              </div>
+            </div>
+          )}
+
+          <div className="oops-resume-panel">
+            <span className="oops-sync-pill">
+              {isAuthenticated
+                ? "Progress saved to your account"
+                : "Browse lessons — sign in to save progress"}
+            </span>
+            <h2>{resumeLesson.title}</h2>
+            <p>
+              {resumeLesson.chapterTitle} · {resumeLesson.xp} XP
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate(`${BASE_PATH}/lesson/${resumeLesson.id}`)}
+            >
+              {completedCount > 0 ? "Resume Course" : "Start Course"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="oops-guide-tools">
+        <div className="oops-tool-panel oops-tool-panel-main">
+          <span className="oops-interactive-label">Find a topic</span>
+          <div className="oops-search-row">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search concepts..."
+              aria-label="Search lessons"
+            />
+            <div
+              className="oops-filter-tabs"
+              aria-label="Filter lessons"
+            >
+              {[
+                ["all", "All"],
+                ["todo", "To do"],
+                ["done", "Done"],
+                ["bookmarked", "Saved"],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={filter === value ? "active" : ""}
+                  onClick={() => setFilter(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="oops-search-results">
+            {filteredLessons.slice(0, 6).map((lesson) => (
+              <button
+                key={lesson.id}
+                type="button"
+                className="oops-search-result"
+                onClick={() => navigate(`${BASE_PATH}/lesson/${lesson.id}`)}
+              >
+                <span>{progress[lesson.id] ? "✓" : "○"}</span>
+                <strong>{lesson.title}</strong>
+                <small>{lesson.chapterTitle}</small>
+              </button>
+            ))}
+            {filteredLessons.length === 0 && (
+              <p className="oops-empty-copy">No lessons match that search.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="oops-tool-panel">
+          <span className="oops-interactive-label">Recommended</span>
+          <h2>{nextLesson.title}</h2>
+          <p>
+            Next in {nextLesson.chapterTitle}. Earn {nextLesson.xp} XP.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate(`${BASE_PATH}/lesson/${nextLesson.id}`)}
+          >
+            Open next lesson
+          </button>
+        </div>
+
+        <div className="oops-tool-panel">
+          <span className="oops-interactive-label">Bookmarks</span>
+          {bookmarkedLessons.length > 0 ? (
+            <div className="oops-bookmark-list">
+              {bookmarkedLessons.slice(0, 3).map((lesson) => (
+                <button
+                  key={lesson.id}
+                  type="button"
+                  onClick={() => navigate(`${BASE_PATH}/lesson/${lesson.id}`)}
+                >
+                  <strong>{lesson.title}</strong>
+                  <small>{lesson.chapterTitle}</small>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p>Bookmark lessons to review them here.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="oops-dashboard-strip">
+        <div className="oops-stat-tile">
+          <span>Lessons</span>
+          <strong>
+            {completedCount}/{SQLJOINS_LESSONS.length}
+          </strong>
+        </div>
+        <div className="oops-stat-tile">
+          <span>Chapters</span>
+          <strong>
+            {completedChapters}/{SQLJOINS_CHAPTERS.length}
+          </strong>
+        </div>
+        <div className="oops-stat-tile">
+          <span>XP</span>
+          <strong>
+            {earnedXP}/{SQLJOINS_TOTAL_XP}
+          </strong>
+        </div>
+        <div className="oops-stat-tile">
+          <span>Bookmarks</span>
+          <strong>{bookmarks.length}</strong>
+        </div>
+      </div>
+
+      <LearnChapterPathOverview
+        chapters={SQLJOINS_CHAPTERS}
+        progress={progress}
+        onChapterSelect={(chapter) =>
+          navigate(`${BASE_PATH}/lesson/${chapter.lessons[0].id}`)
+        }
+      />
+
+      <LearnChapterGrid
+        chapters={SQLJOINS_CHAPTERS}
+        progress={progress}
+        basePath={BASE_PATH}
+        navigate={navigate}
+      />
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /pages/SqlJoinsLessonPage.jsx
+--------------------------------------------------------------------------------
+import React, { useEffect, useRef, useState } from "react";
+import { LEARN_ACCENT } from "../../shared/learnAccent";
+import { useNavigate, useParams } from "react-router-dom";
+import NumpyIntroTheory from "../../numpy-py/components/NumpyIntroTheory";
+import OopsSidebar from "../../oops-cpp/components/OopsSidebar";
+import LearnProfileMenu from "../../shared/LearnProfileMenu";
+import LessonContentShell from "../../shared/LessonContentShell";
+import SqlJoinsCodeChallenge from "../components/SqlJoinsCodeChallenge";
+import {
+  SQLJOINS_CHAPTERS,
+  SQLJOINS_LESSONS,
+  SQLJOINS_TOTAL_XP,
+} from "../data/sqlJoinsCurriculum";
+import useSqlJoinsProgress from "../hooks/useSqlJoinsProgress";
+import useLessonReadGate from "../../shared/useLessonReadGate";
+import LessonChallengeTab from "../../shared/LessonChallengeTab";
+import { useLessonAssistantContext } from "../../../assistant/hooks/useLessonAssistantContext";
+
+const BASE_PATH = "/learn/sql-joins";
+const READ_GATE_PREFIX = "sqljoins";
+
+export default function SqlJoinsLessonPage() {
+  const { lessonId } = useParams();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState("theory");
+  const [focusMode, setFocusMode] = useState(false);
+  const {
+    markedAsRead,
+    markAsRead,
+    confidence,
+    handleConfidenceChange,
+    createGoToChallenge,
+    challengeTabLocked,
+  } = useLessonReadGate(READ_GATE_PREFIX, lessonId);
+  const goToChallenge = createGoToChallenge(setTab);
+  const {
+    user,
+    isAuthenticated,
+    completedMap: progress,
+    savedCodeMap,
+    bookmarks,
+    completeLesson,
+    rememberLesson,
+    saveCode,
+    toggleBookmark,
+  } = useSqlJoinsProgress();
+  const codeSaveTimer = useRef(null);
+
+  const lesson = SQLJOINS_LESSONS.find((item) => item.id === lessonId);
+  const lessonIdx = SQLJOINS_LESSONS.findIndex(
+    (item) => item.id === lessonId,
+  );
+  const prev = SQLJOINS_LESSONS[lessonIdx - 1];
+  const next = SQLJOINS_LESSONS[lessonIdx + 1];
+
+  useLessonAssistantContext({
+    course: "SQL Joins",
+    language: "SQL",
+    lesson,
+    chapter: lesson?.chapterTitle,
+    tab,
+    code: savedCodeMap[lessonId] || "",
+  });
+
+  useEffect(() => {
+    setTab("theory");
+  }, [lessonId]);
+
+  useEffect(() => {
+    if (lessonId) rememberLesson(lessonId);
+  }, [lessonId, rememberLesson]);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(codeSaveTimer.current);
+    },
+    [],
+  );
+
+  if (!lesson) {
+    return (
+      <div className="oops-not-found">
+        <p>Lesson not found.</p>
+        <button type="button" onClick={() => navigate(BASE_PATH)}>
+          ← Back to SQL Joins
+        </button>
+      </div>
+    );
+  }
+
+  const isCompleted = isAuthenticated && !!progress[lessonId];
+  const isBookmarked = bookmarks.includes(lessonId);
+  const completedCount = Object.keys(progress).length;
+  const earnedXP = SQLJOINS_LESSONS.filter((item) => progress[item.id]).reduce(
+    (sum, item) => sum + item.xp,
+    0,
+  );
+
+  async function handleChallengeComplete() {
+    await completeLesson(lesson);
+  }
+
+  function handleCodeChange(code) {
+    window.clearTimeout(codeSaveTimer.current);
+    codeSaveTimer.current = window.setTimeout(() => {
+      saveCode(lessonId, code).catch(() => {});
+    }, 700);
+  }
+
+  return (
+    <div className={`oops-lesson-page ${focusMode ? "oops-focus-mode" : ""}`}>
+      <OopsSidebar
+        currentLessonId={lessonId}
+        progress={progress}
+        chapters={SQLJOINS_CHAPTERS}
+        basePath={BASE_PATH}
+        title="SQL Joins"
+      />
+
+      <div className="oops-lesson-main">
+        <div className="oops-lesson-topbar">
+          <button
+            type="button"
+            className="oops-back-btn"
+            onClick={() => navigate(BASE_PATH)}
+          >
+            ← SQL Joins
+          </button>
+          <div className="oops-lesson-breadcrumb">
+            <span className="learn-lesson-chapter-tag">
+              {lesson.chapterTitle || "Chapter 1"}
+            </span>
+            <span className="oops-bc-sep">›</span>
+            <span>{lesson.title}</span>
+          </div>
+          {isCompleted && (
+            <span className="oops-completed-badge">✓ Completed</span>
+          )}
+          <button
+            type="button"
+            className={`oops-bookmark-btn ${isBookmarked ? "active" : ""}`}
+            onClick={() => toggleBookmark(lessonId)}
+          >
+            {isBookmarked ? "★" : "☆"}
+          </button>
+          <button
+            type="button"
+            className={`oops-focus-btn ${focusMode ? "active" : ""}`}
+            onClick={() => setFocusMode((v) => !v)}
+          >
+            {focusMode ? "Exit Focus" : "Focus"}
+          </button>
+          <LearnProfileMenu
+            user={user}
+            trackTitle="SQL Joins"
+            syncLabel={
+              isAuthenticated
+                ? "Progress saved to your account"
+                : "Sign in to save progress"
+            }
+            completedCount={completedCount}
+            totalLessons={SQLJOINS_LESSONS.length}
+            earnedXP={earnedXP}
+            totalXP={SQLJOINS_TOTAL_XP}
+            bookmarksCount={bookmarks.length}
+            streak={0}
+          />
+        </div>
+
+        <div className="oops-tabs">
+          <button
+            type="button"
+            className={`oops-tab ${tab === "theory" ? "active" : ""}`}
+            onClick={() => setTab("theory")}
+          >
+            Theory
+          </button>
+          <LessonChallengeTab
+            active={tab === "challenge"}
+            locked={challengeTabLocked}
+            xp={lesson.xp}
+            onClick={goToChallenge}
+          />
+        </div>
+
+        <LessonContentShell
+          tab={tab}
+          storageKey={`sqljoins:${lessonId}`}
+          videoUrl={lesson.videoUrl}
+          videoTitle={`${lesson.title} — SQL Joins`}
+        >
+          {tab === "theory" ? (
+            <NumpyIntroTheory
+              lesson={lesson}
+              quizStoragePrefix={READ_GATE_PREFIX}
+              confidence={confidence}
+              onConfidenceChange={handleConfidenceChange}
+              markedAsRead={markedAsRead}
+              onMarkAsRead={markAsRead}
+              onGoChallenge={goToChallenge}
+            />
+          ) : (
+            <SqlJoinsCodeChallenge
+              challenge={lesson.challenge || lesson.challenges?.[0] || { id: 'c1', title: 'No challenge', description: 'N/A', starterCode: '', tests: [] }}
+              accentColor={LEARN_ACCENT}
+              isCompleted={isCompleted}
+              onComplete={handleChallengeComplete}
+              initialCode={savedCodeMap[lessonId]}
+              onCodeChange={handleCodeChange}
+            />
+          )}
+        </LessonContentShell>
+
+        <div className="oops-lesson-nav">
+          {prev ? (
+            <button
+              type="button"
+              className="oops-nav-btn"
+              onClick={() => navigate(`${BASE_PATH}/lesson/${prev.id}`)}
+            >
+              ← {prev.title}
+            </button>
+          ) : (
+            <div />
+          )}
+          {next ? (
+            <button
+              type="button"
+              className="oops-nav-btn oops-nav-next"
+              onClick={() => navigate(`${BASE_PATH}/lesson/${next.id}`)}
+            >
+              {next.title} →
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="oops-nav-btn oops-nav-next"
+              onClick={() => navigate(BASE_PATH)}
+            >
+              Finish Course →
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+END OF FOLDER: sql-joins
+================================================================================
