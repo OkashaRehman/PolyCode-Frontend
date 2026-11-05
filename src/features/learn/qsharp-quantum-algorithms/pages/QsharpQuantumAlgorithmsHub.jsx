@@ -22,27 +22,27 @@ const LEARNING_PATH = [
   },
   {
     level: "Intermediate",
-    chapters: ["qa-deutsch"],
+    chapters: ["qa-search"],
     color: "#8b5cf6",
-    summary: "Deutsch's algorithm and Deutsch-Jozsa single-query balance evaluation.",
+    summary: "Recover hidden structure with Bernstein-Vazirani and quantum search.",
   },
   {
     level: "Advanced",
-    chapters: ["qa-search"],
+    chapters: ["qa-qft"],
     color: "#6366f1",
-    summary: "Bernstein-Vazirani secret bitstring retrieval.",
+    summary: "Use Fourier transforms, phase estimation, and order finding.",
   },
   {
     level: "Pro",
-    chapters: ["qa-search"],
+    chapters: ["qa-factoring"],
     color: "#3b82f6",
-    summary: "Grover's Search Algorithm (O(√N) speedup) and amplitude amplification.",
+    summary: "Connect quantum order finding to classical factor extraction.",
   },
   {
     level: "Expert",
-    chapters: ["qa-qft"],
+    chapters: ["qa-hybrid", "qa-evaluation"],
     color: "#0d9488",
-    summary: "Quantum Fourier Transform (QFT), Quantum Phase Estimation (QPE), and order finding.",
+    summary: "Build and evaluate hybrid variational algorithms under finite-shot noise.",
   },
 ];
 

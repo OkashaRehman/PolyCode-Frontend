@@ -1,4 +1,8 @@
 import { createStructuredCourse } from "../../shared/createStructuredCourse";
+import {
+  expandQsharpChapters,
+  QSHARP_LESSON_EXPANSIONS,
+} from "../../shared/qsharpCurriculumExpansion";
 
 export const QSHARP_ERROR_CORRECTION = createStructuredCourse({
   id: "qsharp-error-correction",
@@ -10,7 +14,8 @@ export const QSHARP_ERROR_CORRECTION = createStructuredCourse({
   basePath: "/learn/qsharp-error-correction",
   readGatePrefix: "qsharp_error_correction",
   backPath: "/language/Q%23",
-  chapters: [
+  chapters: expandQsharpChapters(
+    [
     {
       id: "noise-and-errors",
       title: "Noise and Error Models",
@@ -230,7 +235,200 @@ export const QSHARP_ERROR_CORRECTION = createStructuredCourse({
         },
       ],
     },
-  ],
+    {
+      id: "phase-code",
+      title: "Protecting Against Phase Errors",
+      icon: "🔄",
+      color: "#0f766e",
+      topics: [
+        {
+          id: "phase-flip-code",
+          title: "Build a Phase-Flip Repetition Code",
+          xp: 20,
+          overview:
+            "The bit-flip repetition code protects information in the computational basis, while a Hadamard basis change turns phase-flip protection into an analogous repetition problem. This shows why encoding basis and error model must be designed together.",
+          example: `operation EncodePhaseFlip(q0 : Qubit, q1 : Qubit, q2 : Qubit) : Unit {
+    CNOT(q0, q1);
+    CNOT(q0, q2);
+    H(q0);
+    H(q1);
+    H(q2);
+}`,
+          note:
+            "The example illustrates an encoding transform; a complete code also needs syndrome extraction and recovery that preserve the logical state.",
+          quiz: {
+            question: "Why does a Hadamard basis change help protect against phase flips?",
+            options: [
+              "It exchanges the roles of bit- and phase-flip errors",
+              "It removes all physical noise",
+              "It makes measurement unnecessary",
+              "It turns three qubits into one physical qubit",
+            ],
+            answer: 0,
+            explanation:
+              "Conjugating an X error by H maps it to Z, and vice versa, so a repetition strategy can be adapted to a different error basis.",
+          },
+          challenge: {
+            title: "Map an Error Through a Basis Change",
+            description:
+              "Select the Pauli error corresponding to an X error conjugated by Hadamard gates.",
+            question: "What is `H X H`?",
+            options: ["Z", "X", "I", "CNOT"],
+            answer: 0,
+          },
+        },
+      ],
+    },
+    {
+      id: "shor-code",
+      title: "Concatenated Quantum Codes",
+      icon: "🛡️",
+      color: "#2563eb",
+      topics: [
+        {
+          id: "shor-code",
+          title: "Understand the Nine-Qubit Shor Code",
+          xp: 22,
+          overview:
+            "The Shor code concatenates bit-flip and phase-flip repetition ideas to correct an arbitrary single-qubit error in an idealized model. Its layered encoding demonstrates how combining simpler codes expands the set of correctable errors, at the cost of more physical qubits and operations.",
+          example: `operation EncodeShorBlock(q0 : Qubit, q1 : Qubit, q2 : Qubit) : Unit {
+    CNOT(q0, q1);
+    CNOT(q0, q2);
+    H(q0);
+    H(q1);
+    H(q2);
+}`,
+          note:
+            "This short fragment illustrates part of a concatenated encoding, not a complete nine-qubit encoder or a hardware-ready correction routine.",
+          quiz: {
+            question: "What is the key idea behind the Shor code?",
+            options: [
+              "Combine bit-flip and phase-flip repetition encodings",
+              "Use one qubit to correct every possible error",
+              "Avoid measuring any syndrome",
+              "Replace quantum gates with classical randomness",
+            ],
+            answer: 0,
+            explanation:
+              "The code combines repetition strategies in complementary bases to address arbitrary single-qubit errors.",
+          },
+          challenge: {
+            title: "Reason About Concatenation",
+            description:
+              "Choose the resource trade-off introduced by concatenating codes.",
+            question: "What is a direct cost of concatenating quantum codes?",
+            options: [
+              "More physical qubits and operations",
+              "Loss of all logical information by definition",
+              "No need to extract syndromes",
+              "Guaranteed zero noise on hardware",
+            ],
+            answer: 0,
+          },
+        },
+      ],
+    },
+    {
+      id: "surface-code",
+      title: "Syndrome-Based Topological Codes",
+      icon: "🕸️",
+      color: "#7c3aed",
+      topics: [
+        {
+          id: "surface-code-syndromes",
+          title: "Read Surface-Code Syndrome Patterns",
+          xp: 24,
+          overview:
+            "Surface codes arrange data and measurement qubits so local parity checks reveal nearby error events. A decoder uses repeated syndrome rounds to infer likely error chains while avoiding direct measurement of the encoded logical state.",
+          example: `operation MeasureLocalParity(q0 : Qubit, q1 : Qubit, ancilla : Qubit) : Result {
+    CNOT(q0, ancilla);
+    CNOT(q1, ancilla);
+    let parity = M(ancilla);
+    Reset(ancilla);
+    return parity;
+}`,
+          note:
+            "Real surface-code cycles require carefully scheduled checks, repeated rounds, and a decoder that accounts for measurement errors.",
+          quiz: {
+            question: "What does a local surface-code parity check contribute?",
+            options: [
+              "A syndrome bit used to infer error locations",
+              "A direct readout of the logical state",
+              "A guarantee that all physical gates are noiseless",
+              "A classical replacement for the quantum data",
+            ],
+            answer: 0,
+            explanation:
+              "Local checks create syndrome information that a decoder uses to infer likely errors.",
+          },
+          challenge: {
+            title: "Classify a Syndrome Measurement",
+            description:
+              "Identify what a parity-check result should be used for.",
+            question: "A parity-check result is primarily used to…",
+            options: [
+              "Help locate an error without reading the logical value",
+              "Determine the source-code indentation",
+              "Measure every data qubit in the Z basis",
+              "Prove the hardware has no noise",
+            ],
+            answer: 0,
+          },
+        },
+      ],
+    },
+    {
+      id: "fault-tolerance",
+      title: "Fault-Tolerant Design & Resource Trade-Offs",
+      icon: "📈",
+      color: "#be123c",
+      topics: [
+        {
+          id: "fault-tolerant-resources",
+          title: "Evaluate Logical Error and Resource Overhead",
+          xp: 24,
+          overview:
+            "Fault-tolerant design balances physical error rates, code distance, logical error targets, and the number of physical qubits needed. A larger code can suppress logical errors only under appropriate assumptions and usually increases runtime and resource overhead.",
+          example: `operation RunCorrectionRounds(rounds : Int) : Unit {
+    for round in 1..rounds {
+        // Measure checks and decode the syndrome for this round.
+    }
+}`,
+          note:
+            "Resource estimates are model-dependent; report the noise assumptions, target logical error, and code distance used in the estimate.",
+          quiz: {
+            question: "Why should a fault-tolerant resource estimate state its assumptions?",
+            options: [
+              "Logical error and overhead depend on the noise and target model",
+              "Code distance is always independent of physical error rates",
+              "Resource estimates are exact hardware guarantees",
+              "Assumptions eliminate the need for validation",
+            ],
+            answer: 0,
+            explanation:
+              "Noise, decoding, and target logical error assumptions determine the estimated code size and overhead.",
+          },
+          challenge: {
+            title: "Choose a Sound Resource Comparison",
+            description:
+              "Select the comparison that makes two fault-tolerant estimates meaningfully comparable.",
+            question: "Which pair should be reported together?",
+            options: [
+              "Logical error target and physical error assumptions",
+              "Editor theme and file extension",
+              "Number of comments and variable names",
+              "Code distance without any noise model",
+            ],
+            answer: 0,
+          },
+        },
+      ],
+    },
+    ],
+    QSHARP_LESSON_EXPANSIONS.errorCorrection.chapters,
+    "topics",
+    QSHARP_LESSON_EXPANSIONS.errorCorrection.examples,
+  ),
 });
 
 export const QSHARP_ERROR_CORRECTION_CHAPTERS =

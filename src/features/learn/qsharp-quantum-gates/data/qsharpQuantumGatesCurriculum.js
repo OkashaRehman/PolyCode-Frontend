@@ -1,5 +1,9 @@
 // PolyCode — Q# Quantum Gates curriculum
 import { applyLessonVideoLinks } from "../../shared/applyLessonVideoLinks";
+import {
+  expandQsharpChapters,
+  QSHARP_LESSON_EXPANSIONS,
+} from "../../shared/qsharpCurriculumExpansion";
 import { QSHARP_QUANTUM_GATES_VIDEO_LINKS } from "./qsharpQuantumGatesVideoLinks";
 
 const ACCENT = "#e11d48";
@@ -224,9 +228,119 @@ const RAW_CHAPTERS = [
       },
     ],
   },
+  {
+    id: "qg-basis",
+    title: "Basis Changes & Phase Kickback",
+    icon: "🧭",
+    color: "#0f766e",
+    lessons: [
+      {
+        id: "qg-9",
+        title: "Change Measurement Basis with Gates",
+        xp: 18,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Changing basis before a Z-basis measurement lets a circuit access information in another basis. For example, applying H before measurement measures in the X basis; phase kickback uses a target phase to imprint oracle information on a control register.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Measure in the X basis",
+            content: `operation MeasureInXBasis(q : Qubit) : Result {\n    H(q);\n    return M(q);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Select a Measurement-Basis Circuit",
+          description: "Write `basis_change_gate(basis)` returning `'H'` for `'X'`, `'I'` for `'Z'`, and `'Unsupported'` otherwise.",
+          starterCode: `def basis_change_gate(basis):\n    # Return the gate applied before Z measurement\n    pass\n`,
+          solutionCode: `def basis_change_gate(basis):\n    if basis == "X":\n        return "H"\n    if basis == "Z":\n        return "I"\n    return "Unsupported"`,
+          tests: [
+            { id: 1, label: "Defines basis_change_gate", keywords: [{ pattern: "def\\s+basis_change_gate" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qg-decomposition",
+    title: "Gate Decomposition & Fault-Tolerant Cost",
+    icon: "📐",
+    color: "#7c3aed",
+    lessons: [
+      {
+        id: "qg-10",
+        title: "Estimate Decomposition and T-Count",
+        xp: 20,
+        theory: [
+          {
+            type: "text",
+            content:
+              "A logical operation may need decomposition into a hardware- or fault-tolerant gate set. Approximation depth, two-qubit gate count, and especially T-count can dominate execution cost, so a mathematically correct circuit is not automatically an efficient one.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Compose a rotation from standard gates",
+            content: `operation ApproximateRotation(q : Qubit) : Unit {\n    H(q);\n    T(q);\n    H(q);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Estimate Circuit T-Count",
+          description: "Write `total_t_count(operations)` returning the number of `'T'` entries in a list of gate names.",
+          starterCode: `def total_t_count(operations):\n    # Count T gates\n    pass\n`,
+          solutionCode: `def total_t_count(operations):\n    return sum(operation == "T" for operation in operations)`,
+          tests: [
+            { id: 1, label: "Defines total_t_count", keywords: [{ pattern: "def\\s+total_t_count" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qg-verification",
+    title: "Circuit Verification & Optimization",
+    icon: "✅",
+    color: "#0891b2",
+    lessons: [
+      {
+        id: "qg-11",
+        title: "Simplify and Verify Gate Sequences",
+        xp: 20,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Circuit optimization starts with semantics-preserving rewrites: adjacent self-inverse gates such as H-H or X-X cancel, while gate reordering is valid only when operators commute. Verify each rewrite against the circuit's action, not just its appearance.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Self-inverse gate identity",
+            content: `operation ApplyIdentity(q : Qubit) : Unit {\n    H(q);\n    H(q);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Cancel Adjacent Self-Inverse Gates",
+          description: "Write `cancel_pairs(gates)` removing adjacent identical gates from a sequence. Assume all entries are self-inverse gate names.",
+          starterCode: `def cancel_pairs(gates):\n    # Remove adjacent identical pairs\n    pass\n`,
+          solutionCode: `def cancel_pairs(gates):\n    result = []\n    for gate in gates:\n        if result and result[-1] == gate:\n            result.pop()\n        else:\n            result.append(gate)\n    return result`,
+          tests: [
+            { id: 1, label: "Defines cancel_pairs", keywords: [{ pattern: "def\\s+cancel_pairs" }] },
+          ],
+        },
+      },
+    ],
+  },
 ];
 
-export const QSHARP_QUANTUM_GATES_CHAPTERS = RAW_CHAPTERS;
+export const QSHARP_QUANTUM_GATES_CHAPTERS = expandQsharpChapters(
+  RAW_CHAPTERS,
+  QSHARP_LESSON_EXPANSIONS.gates.chapters,
+  "lessons",
+  QSHARP_LESSON_EXPANSIONS.gates.examples,
+);
 
 export const QSHARP_QUANTUM_GATES_LESSONS = applyLessonVideoLinks(
   QSHARP_QUANTUM_GATES_CHAPTERS.flatMap((ch) =>

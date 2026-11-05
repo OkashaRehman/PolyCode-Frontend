@@ -1,5 +1,9 @@
 // PolyCode — Q# Quantum Programming Basics curriculum
 import { applyLessonVideoLinks } from "../../shared/applyLessonVideoLinks";
+import {
+  expandQsharpChapters,
+  QSHARP_LESSON_EXPANSIONS,
+} from "../../shared/qsharpCurriculumExpansion";
 import { QSHARP_QUANTUM_PROGRAMMING_BASICS_VIDEO_LINKS } from "./qsharpQuantumProgrammingBasicsVideoLinks";
 
 const ACCENT = "#0284c7";
@@ -231,9 +235,119 @@ const RAW_CHAPTERS = [
       },
     ],
   },
+  {
+    id: "qpb-feed-forward",
+    title: "Mid-Circuit Measurement & Feed-Forward",
+    icon: "↪️",
+    color: "#0f766e",
+    lessons: [
+      {
+        id: "qpb-9",
+        title: "Branch on Measurement Results",
+        xp: 18,
+        theory: [
+          {
+            type: "text",
+            content:
+              "A measurement result is classical data that can control later quantum operations. Feed-forward is essential in protocols such as teleportation, but measurement collapses the measured qubit and must be placed deliberately in the circuit.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Classical feed-forward in Q#",
+            content: `operation CorrectFromResult(q : Qubit) : Unit {\n    let result = M(q);\n    if (result == One) {\n        X(q);\n    }\n}`,
+          },
+        ],
+        challenge: {
+          title: "Choose a Feed-Forward Correction",
+          description: "Write `feed_forward_correction(result)` returning `'X'` for result `1` and `'I'` for result `0`.",
+          starterCode: `def feed_forward_correction(result):\n    # Return the correction gate name\n    pass\n`,
+          solutionCode: `def feed_forward_correction(result):\n    return "X" if result == 1 else "I"`,
+          tests: [
+            { id: 1, label: "Defines feed_forward_correction", keywords: [{ pattern: "def\\s+feed_forward_correction" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qpb-ancillas",
+    title: "Ancillas & Clean Uncomputation",
+    icon: "🧹",
+    color: "#7c3aed",
+    lessons: [
+      {
+        id: "qpb-10",
+        title: "Keep Ancillas Clean",
+        xp: 18,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Ancilla qubits hold temporary information that can help compute an oracle or intermediate value. A well-formed circuit uncomputes this workspace before release so it does not remain entangled with the answer or contaminate later operations.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Compute, use, and uncompute",
+            content: `operation ComputeAndUncompute(q : Qubit, ancilla : Qubit) : Unit {\n    CNOT(q, ancilla);\n    Z(ancilla);\n    CNOT(q, ancilla);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Plan an Uncompute Sequence",
+          description: "Write `uncompute_steps(steps)` returning the inverse operations in reverse order, each prefixed with `'Adjoint '`.",
+          starterCode: `def uncompute_steps(steps):\n    # Return inverse steps in reverse order\n    pass\n`,
+          solutionCode: `def uncompute_steps(steps):\n    return [f"Adjoint {step}" for step in reversed(steps)]`,
+          tests: [
+            { id: 1, label: "Defines uncompute_steps", keywords: [{ pattern: "def\\s+uncompute_steps" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qpb-contracts",
+    title: "Composable Operations & Contracts",
+    icon: "🧩",
+    color: "#0891b2",
+    lessons: [
+      {
+        id: "qpb-11",
+        title: "Design Operations for Algorithm Composition",
+        xp: 20,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Reusable Q# operations should make their qubit inputs, classical parameters, result, and supported functors explicit. Clear operation contracts let algorithms safely compose controlled and adjoint variants and help reviewers reason about circuit behavior.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "An operation with functor support",
+            content: `operation ApplyOracle(q : Qubit) : Unit is Adj + Ctl {\n    Z(q);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Check an Operation Contract",
+          description: "Write `supports_reuse(has_adjoint, has_controlled)` returning `True` only when both capabilities are available.",
+          starterCode: `def supports_reuse(has_adjoint, has_controlled):\n    # Both functors are required\n    pass\n`,
+          solutionCode: `def supports_reuse(has_adjoint, has_controlled):\n    return has_adjoint and has_controlled`,
+          tests: [
+            { id: 1, label: "Defines supports_reuse", keywords: [{ pattern: "def\\s+supports_reuse" }] },
+          ],
+        },
+      },
+    ],
+  },
 ];
 
-export const QSHARP_QUANTUM_PROGRAMMING_BASICS_CHAPTERS = RAW_CHAPTERS;
+export const QSHARP_QUANTUM_PROGRAMMING_BASICS_CHAPTERS = expandQsharpChapters(
+  RAW_CHAPTERS,
+  QSHARP_LESSON_EXPANSIONS.programmingBasics.chapters,
+  "lessons",
+  QSHARP_LESSON_EXPANSIONS.programmingBasics.examples,
+);
 
 export const QSHARP_QUANTUM_PROGRAMMING_BASICS_LESSONS = applyLessonVideoLinks(
   QSHARP_QUANTUM_PROGRAMMING_BASICS_CHAPTERS.flatMap((ch) =>

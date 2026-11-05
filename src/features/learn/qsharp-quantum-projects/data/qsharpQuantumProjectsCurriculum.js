@@ -1,5 +1,9 @@
 // PolyCode — Q# Quantum Projects curriculum
 import { applyLessonVideoLinks } from "../../shared/applyLessonVideoLinks";
+import {
+  expandQsharpChapters,
+  QSHARP_LESSON_EXPANSIONS,
+} from "../../shared/qsharpCurriculumExpansion";
 import { QSHARP_QUANTUM_PROJECTS_VIDEO_LINKS } from "./qsharpQuantumProjectsVideoLinks";
 
 const ACCENT = "#ec4899";
@@ -153,9 +157,154 @@ const RAW_CHAPTERS = [
       },
     ],
   },
+  {
+    id: "qp-validation",
+    title: "Noise-Aware Project Validation",
+    icon: "🧪",
+    color: "#0f766e",
+    lessons: [
+      {
+        id: "qp-6",
+        title: "Validate a Circuit Under Imperfect Outcomes",
+        xp: 24,
+        theory: [
+          {
+            type: "text",
+            content:
+              "A project should test its expected behavior over repeated executions and report deviations instead of treating one sample as proof. Separate algorithmic failures from sampling variation and target-specific noise before changing the circuit.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Collect samples for host-side analysis",
+            content: `operation RunOneShot() : Result {\n    use q = Qubit();\n    H(q);\n    let result = M(q);\n    Reset(q);\n    return result;\n}`,
+          },
+        ],
+        challenge: {
+          title: "Compute an Observed Error Rate",
+          description: "Write `estimate_error_rate(expected, observed)` returning the mismatched fraction for equal-length, non-empty result lists.",
+          starterCode: `def estimate_error_rate(expected, observed):\n    # Return mismatches divided by total runs\n    pass\n`,
+          solutionCode: `def estimate_error_rate(expected, observed):\n    mismatches = sum(left != right for left, right in zip(expected, observed))\n    return mismatches / len(expected)`,
+          tests: [
+            { id: 1, label: "Defines estimate_error_rate", keywords: [{ pattern: "def\\s+estimate_error_rate" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qp-hybrid",
+    title: "Hybrid Optimization Project",
+    icon: "⚖️",
+    color: "#7c3aed",
+    lessons: [
+      {
+        id: "qp-7",
+        title: "Build a Measured VQE Optimization Step",
+        xp: 25,
+        theory: [
+          {
+            type: "text",
+            content:
+              "A practical VQE project separates Q# state preparation and measurement from the host-side optimizer. Each iteration records parameters, energy estimates, shot count, and stopping criteria so results can be reproduced and compared.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Parameterized circuit for a hybrid loop",
+            content: `operation PrepareTrial(theta : Double, q : Qubit) : Unit {\n    Ry(theta, q);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Update Variational Parameters",
+          description: "Write `gradient_step(parameters, gradients, learning_rate)` returning each parameter minus its learning-rate-scaled gradient.",
+          starterCode: `def gradient_step(parameters, gradients, learning_rate):\n    # Return updated parameters\n    pass\n`,
+          solutionCode: `def gradient_step(parameters, gradients, learning_rate):\n    return [parameter - learning_rate * gradient for parameter, gradient in zip(parameters, gradients)]`,
+          tests: [
+            { id: 1, label: "Defines gradient_step", keywords: [{ pattern: "def\\s+gradient_step" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qp-resources",
+    title: "Resource Estimation & Execution Planning",
+    icon: "📐",
+    color: "#0891b2",
+    lessons: [
+      {
+        id: "qp-8",
+        title: "Budget Qubits Before Target Execution",
+        xp: 25,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Before submitting a workload, estimate logical data qubits, ancillas, circuit depth, and repetitions. Resource estimates expose infeasible designs early and help compare algorithmic improvements independently from hardware availability.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Make workspace requirements explicit",
+            content: `operation AllocateWorkspace(dataQubits : Int, ancillas : Int) : Unit {\n    use data = Qubit[dataQubits];\n    use workspace = Qubit[ancillas];\n    ResetAll(data);\n    ResetAll(workspace);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Check a Qubit Budget",
+          description: "Write `fits_qubit_budget(data_qubits, ancillas, budget)` returning whether total qubit demand is within budget.",
+          starterCode: `def fits_qubit_budget(data_qubits, ancillas, budget):\n    # Compare total demand with budget\n    pass\n`,
+          solutionCode: `def fits_qubit_budget(data_qubits, ancillas, budget):\n    return data_qubits + ancillas <= budget`,
+          tests: [
+            { id: 1, label: "Defines fits_qubit_budget", keywords: [{ pattern: "def\\s+fits_qubit_budget" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qp-reproducibility",
+    title: "Reproducible Delivery & Technical Reporting",
+    icon: "📋",
+    color: "#f43f5e",
+    lessons: [
+      {
+        id: "qp-9",
+        title: "Deliver a Reproducible Quantum Experiment",
+        xp: 30,
+        theory: [
+          {
+            type: "text",
+            content:
+              "A professional quantum deliverable records the Q# and SDK versions, execution target, circuit parameters, shot count, and measured outcome summary. Include limitations and resource estimates so another developer can reproduce the workflow without mistaking simulator evidence for hardware performance.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Return structured experiment results",
+            content: `newtype ExperimentResult = (Shots : Int, Successes : Int);\n\nfunction SuccessRate(result : ExperimentResult) : Double {\n    return IntAsDouble(result::Successes) / IntAsDouble(result::Shots);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Create a Run Summary",
+          description: "Write `experiment_summary(target, shots, successes)` returning `'target: successes/shots successful shots'` using the provided values.",
+          starterCode: `def experiment_summary(target, shots, successes):\n    # Return a compact reproducibility summary\n    pass\n`,
+          solutionCode: `def experiment_summary(target, shots, successes):\n    return f"{target}: {successes}/{shots} successful shots"`,
+          tests: [
+            { id: 1, label: "Defines experiment_summary", keywords: [{ pattern: "def\\s+experiment_summary" }] },
+          ],
+        },
+      },
+    ],
+  },
 ];
 
-export const QSHARP_QUANTUM_PROJECTS_CHAPTERS = RAW_CHAPTERS;
+export const QSHARP_QUANTUM_PROJECTS_CHAPTERS = expandQsharpChapters(
+  RAW_CHAPTERS,
+  QSHARP_LESSON_EXPANSIONS.projects.chapters,
+  "lessons",
+  QSHARP_LESSON_EXPANSIONS.projects.examples,
+);
 
 export const QSHARP_QUANTUM_PROJECTS_LESSONS = applyLessonVideoLinks(
   QSHARP_QUANTUM_PROJECTS_CHAPTERS.flatMap((ch) =>

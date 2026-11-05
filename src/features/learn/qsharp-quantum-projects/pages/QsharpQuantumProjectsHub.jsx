@@ -22,27 +22,27 @@ const LEARNING_PATH = [
   },
   {
     level: "Intermediate",
-    chapters: ["qp-crypto"],
+    chapters: ["qp-capstone"],
     color: "#d946ef",
-    summary: "Quantum Teleportation Protocol using Bell pairs & 2 classical bits.",
+    summary: "Build superdense coding, VQE, and an end-to-end quantum capstone.",
   },
   {
     level: "Advanced",
-    chapters: ["qp-crypto"],
+    chapters: ["qp-validation"],
     color: "#a855f7",
-    summary: "BB84 Quantum Key Distribution (QKD) & eavesdropper detection.",
+    summary: "Validate project behavior across repeated, imperfect executions.",
   },
   {
     level: "Pro",
-    chapters: ["qp-capstone"],
+    chapters: ["qp-hybrid", "qp-resources"],
     color: "#8b5cf6",
-    summary: "Superdense coding (transmitting 2 classical bits through 1 physical qubit).",
+    summary: "Coordinate host-side optimization and estimate execution resources.",
   },
   {
     level: "Expert",
-    chapters: ["qp-capstone"],
+    chapters: ["qp-reproducibility"],
     color: "#f43f5e",
-    summary: "Variational Quantum Eigensolver (VQE) simulator & full Q# Capstone Project.",
+    summary: "Deliver reproducible experiments with transparent technical reporting.",
   },
 ];
 

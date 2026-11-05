@@ -22,27 +22,27 @@ const LEARNING_PATH = [
   },
   {
     level: "Intermediate",
-    chapters: ["qsf-intro"],
+    chapters: ["qsf-types"],
     color: "#0284c7",
-    summary: "Operations vs functions and qubit allocation using the use statement.",
+    summary: "Q# values, quantum types, and control flow.",
   },
   {
     level: "Advanced",
-    chapters: ["qsf-types"],
+    chapters: ["qsf-measurement"],
     color: "#059669",
-    summary: "Immutable let & mutable set variables, primitive & quantum types.",
+    summary: "Measurements, resets, and returning results to host applications.",
   },
   {
     level: "Pro",
-    chapters: ["qsf-types"],
+    chapters: ["qsf-composition", "qsf-functors"],
     color: "#7c3aed",
-    summary: "Control flow (if, for, repeat-until-fixup) and quantum loops.",
+    summary: "Compose typed operations and reuse them through Q# functors.",
   },
   {
     level: "Expert",
-    chapters: ["qsf-measurement"],
+    chapters: ["qsf-validation"],
     color: "#e11d48",
-    summary: "Z-basis measurement (M), resetting qubits (Reset), and classical conversions.",
+    summary: "Validate sampled behavior and integrate quantum routines with host code.",
   },
 ];
 

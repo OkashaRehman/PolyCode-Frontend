@@ -22,27 +22,27 @@ const LEARNING_PATH = [
   },
   {
     level: "Intermediate",
-    chapters: ["qpb-superposition"],
+    chapters: ["qpb-registers"],
     color: "#0078d4",
-    summary: "State vector preparation and Ry rotation transformations.",
+    summary: "Allocate registers, apply controlled operations, and create entangled states.",
   },
   {
     level: "Advanced",
-    chapters: ["qpb-registers"],
+    chapters: ["qpb-operators"],
     color: "#6366f1",
-    summary: "Qubit array allocations (Qubit[n]) and Controlled functors.",
+    summary: "Use adjoints and reversible transformations to manage circuit workspace.",
   },
   {
     level: "Pro",
-    chapters: ["qpb-registers"],
+    chapters: ["qpb-feed-forward", "qpb-ancillas"],
     color: "#a855f7",
-    summary: "Bell state entanglement (|Φ⁺⟩) and multi-qubit correlations.",
+    summary: "Build measurement-driven circuits and uncompute temporary ancillas.",
   },
   {
     level: "Expert",
-    chapters: ["qpb-operators"],
+    chapters: ["qpb-contracts"],
     color: "#ec4899",
-    summary: "The Adjoint functor, reversible transformations, and register measurements.",
+    summary: "Design operation contracts for safe, composable quantum algorithms.",
   },
 ];
 

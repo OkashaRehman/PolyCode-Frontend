@@ -22,27 +22,27 @@ const LEARNING_PATH = [
   },
   {
     level: "Intermediate",
-    chapters: ["qg-single"],
+    chapters: ["qg-two"],
     color: "#f97316",
-    summary: "Rotation gates (Rx, Ry, Rz) and S & T phase gates.",
+    summary: "Compose CNOT, controlled-phase, and SWAP gates across qubits.",
   },
   {
     level: "Advanced",
-    chapters: ["qg-two"],
+    chapters: ["qg-multi"],
     color: "#f59e0b",
-    summary: "Two-qubit CNOT / CX and Controlled-Z (CZ) operations.",
+    summary: "Build universal reversible logic with multi-qubit gates.",
   },
   {
     level: "Pro",
-    chapters: ["qg-two"],
+    chapters: ["qg-basis", "qg-decomposition"],
     color: "#10b981",
-    summary: "SWAP gate operations and state exchange circuits.",
+    summary: "Use basis transforms and evaluate fault-tolerant gate costs.",
   },
   {
     level: "Expert",
-    chapters: ["qg-multi"],
+    chapters: ["qg-verification"],
     color: "#06b6d4",
-    summary: "Multi-qubit Toffoli (CCNOT) gates, gate decomposition, and reversible logic synthesis.",
+    summary: "Verify semantics-preserving circuit optimizations.",
   },
 ];
 

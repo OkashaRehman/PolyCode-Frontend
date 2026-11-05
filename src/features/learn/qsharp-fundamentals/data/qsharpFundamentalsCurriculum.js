@@ -1,5 +1,9 @@
 // PolyCode — Q# Fundamentals curriculum
 import { applyLessonVideoLinks } from "../../shared/applyLessonVideoLinks";
+import {
+  expandQsharpChapters,
+  QSHARP_LESSON_EXPANSIONS,
+} from "../../shared/qsharpCurriculumExpansion";
 import { QSHARP_FUNDAMENTALS_VIDEO_LINKS } from "./qsharpFundamentalsVideoLinks";
 
 const ACCENT = "#0078d4";
@@ -305,9 +309,119 @@ const RAW_CHAPTERS = [
       },
     ],
   },
+  {
+    id: "qsf-composition",
+    title: "Functions, Tuples & Reusable Data",
+    icon: "🧱",
+    color: "#0f766e",
+    lessons: [
+      {
+        id: "qsf-9",
+        title: "Compose Operations with Tuples and User-Defined Types",
+        xp: 16,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Q# functions and operations can accept and return tuples, arrays, and user-defined types. Modeling related values together makes quantum routines easier to compose with classical host code.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "A compact result type",
+            content: `newtype SampleSummary = (Total : Int, Ones : Int);\n\nfunction Summarize(total : Int, ones : Int) : SampleSummary {\n    return SampleSummary(total, ones);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Summarize Measurement Samples",
+          description: "Write `summarize_samples(samples)` returning `(number_of_samples, number_of_ones)` for a list of 0/1 results.",
+          starterCode: `def summarize_samples(samples):\n    # Return (total, number of ones)\n    pass\n`,
+          solutionCode: `def summarize_samples(samples):\n    return (len(samples), sum(samples))`,
+          tests: [
+            { id: 1, label: "Defines summarize_samples", keywords: [{ pattern: "def\\s+summarize_samples" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qsf-functors",
+    title: "Reusable Operations & Functors",
+    icon: "🔁",
+    color: "#0891b2",
+    lessons: [
+      {
+        id: "qsf-10",
+        title: "Use Adjoint and Controlled Operations",
+        xp: 18,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Q# functors transform operations: `Adjoint` applies the inverse transformation, while `Controlled` applies an operation only when control qubits satisfy the control condition. These capabilities let algorithms reuse one operation instead of duplicating circuit logic.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Transforming an operation",
+            content: `operation ApplyPhase(q : Qubit) : Unit is Adj {\n    S(q);\n}\n\noperation UndoPhase(q : Qubit) : Unit {\n    Adjoint ApplyPhase(q);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Build an Uncomputation Schedule",
+          description: "Write `inverse_gate_sequence(steps)` returning inverse labels in reverse order, such as `['Adjoint Rz', 'Adjoint H']`.",
+          starterCode: `def inverse_gate_sequence(steps):\n    # Reverse the sequence and prefix each gate with Adjoint\n    pass\n`,
+          solutionCode: `def inverse_gate_sequence(steps):\n    return [f"Adjoint {step}" for step in reversed(steps)]`,
+          tests: [
+            { id: 1, label: "Defines inverse_gate_sequence", keywords: [{ pattern: "def\\s+inverse_gate_sequence" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qsf-validation",
+    title: "Testing, Simulation & Host Integration",
+    icon: "🧪",
+    color: "#4f46e5",
+    lessons: [
+      {
+        id: "qsf-11",
+        title: "Validate Quantum Programs Across Repeated Runs",
+        xp: 20,
+        theory: [
+          {
+            type: "text",
+            content:
+              "A simulator is useful for checking program structure and expected distributions, but a single measurement is not a correctness proof. Validate deterministic invariants, run randomized operations repeatedly, and return compact classical results to the host application.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Return a classical result to the host",
+            content: `@EntryPoint()\noperation MeasurePreparedState() : Result {\n    use q = Qubit();\n    X(q);\n    let result = M(q);\n    Reset(q);\n    return result;\n}`,
+          },
+        ],
+        challenge: {
+          title: "Measure an Empirical Success Rate",
+          description: "Write `success_rate(outcomes, expected)` returning the fraction of outcomes equal to the expected result. The input list is non-empty.",
+          starterCode: `def success_rate(outcomes, expected):\n    # Return the matching fraction\n    pass\n`,
+          solutionCode: `def success_rate(outcomes, expected):\n    return sum(outcome == expected for outcome in outcomes) / len(outcomes)`,
+          tests: [
+            { id: 1, label: "Defines success_rate", keywords: [{ pattern: "def\\s+success_rate" }] },
+          ],
+        },
+      },
+    ],
+  },
 ];
 
-export const QSHARP_FUNDAMENTALS_CHAPTERS = RAW_CHAPTERS;
+export const QSHARP_FUNDAMENTALS_CHAPTERS = expandQsharpChapters(
+  RAW_CHAPTERS,
+  QSHARP_LESSON_EXPANSIONS.fundamentals.chapters,
+  "lessons",
+  QSHARP_LESSON_EXPANSIONS.fundamentals.examples,
+);
 
 export const QSHARP_FUNDAMENTALS_LESSONS = applyLessonVideoLinks(
   QSHARP_FUNDAMENTALS_CHAPTERS.flatMap((ch) =>

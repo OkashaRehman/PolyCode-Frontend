@@ -1,5 +1,9 @@
 // PolyCode — Q# Quantum Algorithms curriculum
 import { applyLessonVideoLinks } from "../../shared/applyLessonVideoLinks";
+import {
+  expandQsharpChapters,
+  QSHARP_LESSON_EXPANSIONS,
+} from "../../shared/qsharpCurriculumExpansion";
 import { QSHARP_QUANTUM_ALGORITHMS_VIDEO_LINKS } from "./qsharpQuantumAlgorithmsVideoLinks";
 
 const ACCENT = "#a855f7";
@@ -231,9 +235,119 @@ const RAW_CHAPTERS = [
       },
     ],
   },
+  {
+    id: "qa-factoring",
+    title: "Shor's Algorithm & Classical Post-Processing",
+    icon: "🔢",
+    color: "#0f766e",
+    lessons: [
+      {
+        id: "qa-9",
+        title: "Turn an Order into Candidate Factors",
+        xp: 22,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Shor's factoring workflow combines quantum order finding with classical checks. Given an even order r for a modulo N, candidates come from gcd(a^(r/2) - 1, N) and gcd(a^(r/2) + 1, N); trivial candidates require a new base or order.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Order finding is one part of a hybrid workflow",
+            content: `operation RunOrderFinding(a : Int, modulus : Int) : Int {\n    // Prepare phase estimation around modular multiplication.\n    // Classical post-processing checks the measured period.\n    return 0;\n}`,
+          },
+        ],
+        challenge: {
+          title: "Extract Non-Trivial Factors",
+          description: "Write `factors_from_order(a, n, r)` returning the non-trivial gcd factors when `r` is positive and even, or an empty list otherwise.",
+          starterCode: `import math\n\ndef factors_from_order(a, n, r):\n    # Return distinct non-trivial factors\n    pass\n`,
+          solutionCode: `import math\n\ndef factors_from_order(a, n, r):\n    if r <= 0 or r % 2:\n        return []\n    half_power = pow(a, r // 2, n)\n    factors = {math.gcd(half_power - 1, n), math.gcd(half_power + 1, n)}\n    return sorted(factor for factor in factors if 1 < factor < n)`,
+          tests: [
+            { id: 1, label: "Defines factors_from_order", keywords: [{ pattern: "def\\s+factors_from_order" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qa-hybrid",
+    title: "Hybrid Variational Algorithms",
+    icon: "⚖️",
+    color: "#7c3aed",
+    lessons: [
+      {
+        id: "qa-10",
+        title: "Connect VQE and QAOA to Classical Optimization",
+        xp: 22,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Variational algorithms alternate parameterized quantum circuits with a classical optimizer. VQE minimizes an energy estimate; QAOA alternates problem and mixer operators for combinatorial objectives. Measurement uncertainty and optimizer behavior are part of the algorithm, not implementation details.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "A parameterized ansatz boundary",
+            content: `operation PrepareAnsatz(theta : Double, q : Qubit) : Unit {\n    Ry(theta, q);\n}`,
+          },
+        ],
+        challenge: {
+          title: "Apply a Parameter-Shift Update",
+          description: "Write `parameter_shift_gradient(plus, minus)` returning half the difference between shifted expectation values.",
+          starterCode: `def parameter_shift_gradient(plus, minus):\n    # Return (plus - minus) / 2\n    pass\n`,
+          solutionCode: `def parameter_shift_gradient(plus, minus):\n    return (plus - minus) / 2`,
+          tests: [
+            { id: 1, label: "Defines parameter_shift_gradient", keywords: [{ pattern: "def\\s+parameter_shift_gradient" }] },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: "qa-evaluation",
+    title: "Sampling, Benchmarking & Algorithm Choice",
+    icon: "📊",
+    color: "#0891b2",
+    lessons: [
+      {
+        id: "qa-11",
+        title: "Evaluate Finite-Shot Quantum Results",
+        xp: 20,
+        theory: [
+          {
+            type: "text",
+            content:
+              "Quantum measurements are sampled, so reported probabilities and objective values have finite-shot uncertainty. Compare algorithms with matched shot budgets, report confidence and resource costs, and distinguish asymptotic query advantages from practical end-to-end performance.",
+          },
+          {
+            type: "code",
+            lang: "qsharp",
+            label: "Repeated samples are evidence, not certainty",
+            content: `operation SampleForEstimate(shots : Int) : Int {\n    // Run the circuit repeatedly and aggregate results in the host.\n    return shots;\n}`,
+          },
+        ],
+        challenge: {
+          title: "Estimate Sampling Uncertainty",
+          description: "Write `standard_error(successes, shots)` returning the binomial standard error from the observed success fraction. `shots` is positive.",
+          starterCode: `import math\n\ndef standard_error(successes, shots):\n    # Return sqrt(p * (1 - p) / shots)\n    pass\n`,
+          solutionCode: `import math\n\ndef standard_error(successes, shots):\n    probability = successes / shots\n    return math.sqrt(probability * (1 - probability) / shots)`,
+          tests: [
+            { id: 1, label: "Defines standard_error", keywords: [{ pattern: "def\\s+standard_error" }] },
+          ],
+        },
+      },
+    ],
+  },
 ];
 
-export const QSHARP_QUANTUM_ALGORITHMS_CHAPTERS = RAW_CHAPTERS;
+export const QSHARP_QUANTUM_ALGORITHMS_CHAPTERS = expandQsharpChapters(
+  RAW_CHAPTERS,
+  QSHARP_LESSON_EXPANSIONS.algorithms.chapters,
+  "lessons",
+  QSHARP_LESSON_EXPANSIONS.algorithms.examples,
+);
 
 export const QSHARP_QUANTUM_ALGORITHMS_LESSONS = applyLessonVideoLinks(
   QSHARP_QUANTUM_ALGORITHMS_CHAPTERS.flatMap((ch) =>
