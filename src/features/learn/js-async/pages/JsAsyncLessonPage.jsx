@@ -1,0 +1,106 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { LEARN_ACCENT } from "../../shared/learnAccent";
+import { useLessonAssistantContext } from "../../../assistant/hooks/useLessonAssistantContext";
+import LearnProfileMenu from "../../shared/LearnProfileMenu";
+import LessonContentShell from "../../shared/LessonContentShell";
+import JavaScriptCodeChallenge from "../../js-fundamentals/components/JavaScriptCodeChallenge";
+import NumpyIntroTheory from "../../numpy-py/components/NumpyIntroTheory";
+import { JS_ASYNC_CHAPTERS, JS_ASYNC_LESSONS, JS_ASYNC_TOTAL_XP } from "../data/jsAsyncCurriculum";
+import useJsAsyncProgress from "../hooks/useJsAsyncProgress";
+import useLessonReadGate from "../../shared/useLessonReadGate";
+import LessonChallengeTab from "../../shared/LessonChallengeTab";
+import OopsSidebar from "../../oops-cpp/components/OopsSidebar";
+
+const BASE_PATH = "/learn/js-async";
+const READ_GATE_PREFIX = "js_async";
+
+export default function JsAsyncLessonPage() {
+  const { lessonId } = useParams();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState("theory");
+  const [focusMode, setFocusMode] = useState(false);
+  const { markedAsRead, markAsRead, confidence, handleConfidenceChange, createGoToChallenge, challengeTabLocked } = useLessonReadGate(READ_GATE_PREFIX, lessonId);
+  const goToChallenge = createGoToChallenge(setTab);
+  const { user, isAuthenticated, completedMap: progress, savedCodeMap, bookmarks, completeLesson, rememberLesson, saveCode, toggleBookmark } = useJsAsyncProgress();
+  const codeSaveTimer = useRef(null);
+
+  const lesson = JS_ASYNC_LESSONS.find((item) => item.id === lessonId);
+  const lessonIdx = JS_ASYNC_LESSONS.findIndex((item) => item.id === lessonId);
+  const prev = JS_ASYNC_LESSONS[lessonIdx - 1];
+  const next = JS_ASYNC_LESSONS[lessonIdx + 1];
+
+  useLessonAssistantContext({ course: "Asynchronous JS", language: "JavaScript", lesson, chapter: lesson?.chapterTitle, tab, code: savedCodeMap[lessonId] || "" });
+
+  useEffect(() => { setTab("theory"); }, [lessonId]);
+  useEffect(() => { if (lessonId) rememberLesson(lessonId); }, [lessonId, rememberLesson]);
+  useEffect(() => () => { window.clearTimeout(codeSaveTimer.current); }, []);
+
+  if (!lesson) {
+    return (
+      <div className="oops-not-found">
+        <p>Asynchronous JS lesson not found.</p>
+        <button type="button" onClick={() => navigate(BASE_PATH)}>← Back to Asynchronous JS</button>
+      </div>
+    );
+  }
+
+  const isCompleted = isAuthenticated && !!progress[lessonId];
+  const isBookmarked = bookmarks.includes(lessonId);
+  const completedCount = Object.keys(progress).length;
+  const earnedXP = JS_ASYNC_LESSONS.filter((item) => progress[item.id]).reduce((sum, item) => sum + item.xp, 0);
+
+  async function handleChallengeComplete() { await completeLesson(lesson); }
+
+  function handleCodeChange(code) {
+    window.clearTimeout(codeSaveTimer.current);
+    codeSaveTimer.current = window.setTimeout(() => { saveCode(lessonId, code).catch(() => {}); }, 700);
+  }
+
+  return (
+    <div className={`oops-lesson-page ${focusMode ? "oops-focus-mode" : ""}`}>
+      <OopsSidebar currentLessonId={lessonId} progress={progress} chapters={JS_ASYNC_CHAPTERS} basePath={BASE_PATH} title="Asynchronous JS" />
+
+      <div className="oops-lesson-main">
+        <div className="oops-lesson-topbar">
+          <button type="button" className="oops-back-btn" onClick={() => navigate(BASE_PATH)}>← Asynchronous JS</button>
+          <div className="oops-lesson-breadcrumb">
+            <span className="learn-lesson-chapter-tag">{lesson.chapterTitle}</span>
+            <span className="oops-bc-sep">›</span>
+            <span>{lesson.title}</span>
+          </div>
+          {isCompleted && <span className="oops-completed-badge">✓ Completed</span>}
+          <button type="button" className={`oops-bookmark-btn ${isBookmarked ? "active" : ""}`} onClick={() => toggleBookmark(lessonId)}>{isBookmarked ? "★" : "☆"}</button>
+          <button type="button" className={`oops-focus-btn ${focusMode ? "active" : ""}`} onClick={() => setFocusMode((v) => !v)}>{focusMode ? "Exit Focus" : "Focus"}</button>
+          <LearnProfileMenu user={user} trackTitle="Asynchronous JS" syncLabel={isAuthenticated ? "Async JS progress saved to your account" : "Sign in to save progress"} completedCount={completedCount} totalLessons={JS_ASYNC_LESSONS.length} earnedXP={earnedXP} totalXP={JS_ASYNC_TOTAL_XP} bookmarksCount={bookmarks.length} streak={0} />
+        </div>
+
+        <div className="oops-tabs">
+          <button type="button" className={`oops-tab ${tab === "theory" ? "active" : ""}`} onClick={() => setTab("theory")}>Theory</button>
+          <LessonChallengeTab active={tab === "challenge"} locked={challengeTabLocked} xp={lesson.xp} onClick={goToChallenge} />
+        </div>
+
+        <LessonContentShell tab={tab} storageKey={`js-async:${lessonId}`} videoUrl={lesson.videoUrl} videoTitle={`${lesson.title} — Asynchronous JS`}>
+          {tab === "theory" ? (
+            <NumpyIntroTheory
+              lesson={lesson}
+              quizStoragePrefix={READ_GATE_PREFIX}
+              confidence={confidence}
+              onConfidenceChange={handleConfidenceChange}
+              markedAsRead={markedAsRead}
+              onMarkAsRead={markAsRead}
+              onGoChallenge={goToChallenge}
+            />
+          ) : (
+            <JavaScriptCodeChallenge challenge={lesson.challenge} accentColor={LEARN_ACCENT} isCompleted={isCompleted} onComplete={handleChallengeComplete} initialCode={savedCodeMap[lessonId]} onCodeChange={handleCodeChange} />
+          )}
+        </LessonContentShell>
+
+        <div className="oops-lesson-nav">
+          {prev ? (<button type="button" className="oops-nav-btn" onClick={() => navigate(`${BASE_PATH}/lesson/${prev.id}`)}>← {prev.title}</button>) : <div />}
+          {next ? (<button type="button" className="oops-nav-btn oops-nav-next" onClick={() => navigate(`${BASE_PATH}/lesson/${next.id}`)}>{next.title} →</button>) : (<button type="button" className="oops-nav-btn oops-nav-next" onClick={() => navigate(BASE_PATH)}>Finish Course →</button>)}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,123 @@
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import CodeBlock from './CodeBlock';
+
+function normalizeDocLanguage(lang = '') {
+  const key = String(lang).toLowerCase().trim();
+  const aliases = {
+    'c++': 'cpp',
+    cpp: 'cpp',
+    cc: 'cpp',
+    cxx: 'cpp',
+    'c#': 'csharp',
+    cs: 'csharp',
+    shell: 'bash',
+    sh: 'bash',
+    ps1: 'powershell',
+    bat: 'batch',
+    batchfile: 'batch',
+    md: 'markdown',
+    py: 'python',
+    js: 'javascript',
+    ts: 'typescript',
+  };
+  return aliases[key] || key || 'python';
+}
+
+function extensionFromLanguage(lang) {
+  const map = {
+    python: 'py',
+    javascript: 'js',
+    typescript: 'ts',
+    csharp: 'cs',
+    cpp: 'cpp',
+    powershell: 'ps1',
+    batch: 'bat',
+    markdown: 'md',
+  };
+  return map[lang] || lang;
+}
+
+export default function MarkdownRenderer({
+  content,
+  fileType,
+  relatedCode,
+  title,
+  theme,
+}) {
+  if (fileType !== 'markdown' && fileType !== 'md') {
+    const normalizedFileType = normalizeDocLanguage(fileType);
+    return (
+      <div className="doc-body">
+        <CodeBlock
+          language={normalizedFileType}
+          code={content}
+          filename={title && normalizedFileType ? `${title}.${extensionFromLanguage(normalizedFileType)}` : title}
+          theme={theme}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="doc-body">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          // react-markdown v10: 'inline' prop removed. Use node.tagName or check children instead.
+          code({ node, className, children, ...props }) {
+            const match = /language-([a-zA-Z0-9#+-]+)/.exec(className || '');
+            const lang = normalizeDocLanguage(match ? match[1] : 'python');
+            const codeStr = String(children).replace(/\n$/, '');
+
+            // Block code: has a language class, or is long enough to warrant a block
+            const isBlock = Boolean(match) || codeStr.includes('\n') || codeStr.length > 60;
+
+            if (isBlock) {
+              return <CodeBlock language={lang} code={codeStr} theme={theme} />;
+            }
+            return <code className={className} {...props}>{children}</code>;
+          },
+          // Open links in new tab
+          a({ href, children, ...props }) {
+            return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+
+      {relatedCode && relatedCode.length > 0 && (
+        <div className="related-code-section">
+          <div className="related-code-intro">
+            <span className="related-code-label">Core Implementation</span>
+            <h2>
+              {relatedCode.length === 1 ? 'Source Code Reference' : 'Integrated Logic Modules'}
+            </h2>
+          </div>
+
+          {relatedCode.map((codeDoc, index) => (
+            (() => {
+              const rawLang = codeDoc.fileType || codeDoc.language || 'python';
+              const codeLang = normalizeDocLanguage(rawLang);
+              const ext = extensionFromLanguage(codeLang);
+              return (
+                <div key={index} className="related-code-item">
+                  <div className="related-code-wrap">
+                    <CodeBlock
+                      language={codeLang}
+                      code={codeDoc.content}
+                      filename={`${codeDoc.title}.${ext}`}
+                      theme={theme}
+                    />
+                  </div>
+                </div>
+              );
+            })()
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

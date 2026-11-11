@@ -1,0 +1,116 @@
+/* PlaygroundPage.css */
+
+.playground-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: auto;
+}
+
+.playground-page-header {
+  flex-shrink: 0;
+  padding: 20px 28px 16px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--accent, #a78bfa) 6%, transparent) 0%,
+    transparent 100%
+  );
+  border-bottom: 1px solid color-mix(in srgb, var(--border, rgba(255, 255, 255, 0.08)) 80%, transparent);
+}
+
+.pph-top {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.playground-page-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--txt-0, #e2d9fb);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.02em;
+}
+
+.pph-icon {
+  color: var(--accent, #a78bfa);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent, #a78bfa) 40%, transparent));
+}
+
+.pph-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--txt-2, rgba(255, 255, 255, 0.45));
+  line-height: 1.5;
+}
+
+.playground-page-body {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 28px 24px;
+  min-height: 0;
+}
+
+.playground-page-body .playground-root {
+  height: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+html[data-theme="light"] .playground-page-header h1 {
+  color: #312e81;
+}
+
+html[data-theme="light"] .pph-sub {
+  color: #64748b;
+}
+
+html[data-theme="midnight"] .playground-page-header {
+  background: linear-gradient(
+    to bottom,
+    rgba(99, 102, 241, 0.1) 0%,
+    transparent 100%
+  );
+}
+
+html[data-theme="midnight"] .playground-page-header h1 {
+  color: #e4e9ff;
+}
+
+html[data-theme="midnight"] .pph-icon {
+  color: #818cf8;
+}
+
+html[data-theme="classic"] .pph-icon {
+  color: #ffb000;
+}
+
+html[data-theme="ocean"] .pph-icon {
+  color: #2dd4bf;
+}
+
+@media (max-width: 768px) {
+  .playground-page {
+    height: auto;
+    overflow: visible;
+  }
+
+  .playground-page-body {
+    padding: 12px;
+    overflow: visible;
+  }
+
+  .playground-page-body .playground-root {
+    height: auto;
+    min-height: min(600px, 72vh);
+  }
+
+  .playground-page-header {
+    padding: 14px 16px;
+  }
+}

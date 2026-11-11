@@ -1,0 +1,143 @@
+/**
+ * theme-high-contrast.css
+ * High Contrast Theme (WCAG-oriented)
+ */
+
+.high-contrast,
+:root[data-theme="high-contrast"] {
+  --ink:#000;
+  --ink-2:#000;
+  --ink-3:#000;
+  --ink-4:#111;
+  --glass:#000;
+  --glass-heavy:#000;
+  --glass-2:#111;
+  --border:#fff;
+  --border-2:#ff0;
+  --txt-0:#fff;
+  --txt-1:#fff;
+  --txt-2:#e6e6e6;
+  --txt-3:#ccc;
+  --acid:#ffff00;
+  --accent:#ffff00;
+  --acid-glow:rgba(255,255,0,.35);
+  --acid-dim:rgba(255,255,0,.15);
+  --cyan:#00ffff;
+  --cyan-dim:rgba(0,255,255,.15);
+  --violet:#ff00ff;
+  --bg-card:#000;
+  color:var(--txt-0);
+  background:#000;
+}
+
+:root[data-theme="high-contrast"] body{
+  background:#000;
+  color:#fff;
+}
+
+:root[data-theme="high-contrast"] *{
+  color-scheme:dark;
+}
+
+:root[data-theme="high-contrast"] a{
+  color:#00ffff;
+  text-decoration:underline;
+}
+
+:root[data-theme="high-contrast"] h1,
+:root[data-theme="high-contrast"] h2,
+:root[data-theme="high-contrast"] h3,
+:root[data-theme="high-contrast"] h4,
+:root[data-theme="high-contrast"] h5,
+:root[data-theme="high-contrast"] h6{
+  color:#fff;
+}
+
+:root[data-theme="high-contrast"] p,
+:root[data-theme="high-contrast"] span,
+:root[data-theme="high-contrast"] li{
+  color:#fff;
+}
+
+:root[data-theme="high-contrast"] .hero h1 .gradient-text{
+  background:none;
+  color:#ffff00;
+  -webkit-text-fill-color:#ffff00;
+}
+
+:root[data-theme="high-contrast"] .lang-card,
+:root[data-theme="high-contrast"] .card,
+:root[data-theme="high-contrast"] .panel{
+  background:#000!important;
+  border:2px solid #fff!important;
+  box-shadow:none!important;
+}
+
+:root[data-theme="high-contrast"] .lang-card:hover{
+  border-color:#ffff00!important;
+}
+
+:root[data-theme="high-contrast"] button,
+:root[data-theme="high-contrast"] .btn,
+:root[data-theme="high-contrast"] input,
+:root[data-theme="high-contrast"] select,
+:root[data-theme="high-contrast"] textarea{
+  background:#000;
+  color:#fff;
+  border:2px solid #fff;
+}
+
+:root[data-theme="high-contrast"] button:hover,
+:root[data-theme="high-contrast"] .btn:hover{
+  background:#ffff00;
+  color:#000;
+}
+
+:root[data-theme="high-contrast"] button:focus-visible,
+:root[data-theme="high-contrast"] a:focus-visible,
+:root[data-theme="high-contrast"] input:focus-visible,
+:root[data-theme="high-contrast"] textarea:focus-visible,
+:root[data-theme="high-contrast"] select:focus-visible{
+  outline:4px solid #00ffff;
+  outline-offset:3px;
+}
+
+:root[data-theme="high-contrast"] .navbar,
+:root[data-theme="high-contrast"] .sidebar,
+:root[data-theme="high-contrast"] footer{
+  background:#000!important;
+  border-color:#fff!important;
+}
+
+:root[data-theme="high-contrast"] table{
+  border-collapse:collapse;
+}
+:root[data-theme="high-contrast"] table,
+:root[data-theme="high-contrast"] th,
+:root[data-theme="high-contrast"] td{
+  border:2px solid #fff;
+  color:#fff;
+}
+
+:root[data-theme="high-contrast"] code,
+:root[data-theme="high-contrast"] pre{
+  background:#111;
+  color:#ffff00;
+  border:1px solid #fff;
+}
+
+:root[data-theme="high-contrast"] ::selection{
+  background:#ffff00;
+  color:#000;
+}
+
+:root[data-theme="high-contrast"] ::-webkit-scrollbar{
+  width:14px;
+}
+:root[data-theme="high-contrast"] ::-webkit-scrollbar-track{
+  background:#000;
+}
+:root[data-theme="high-contrast"] ::-webkit-scrollbar-thumb{
+  background:#fff;
+  border:2px solid #000;
+}

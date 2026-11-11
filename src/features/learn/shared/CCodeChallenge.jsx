@@ -1,0 +1,433 @@
+import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import Editor from "@monaco-editor/react";
+import { useAuth } from "../../auth/context/AuthContext";
+import { getVSCodeEditorOptions } from "../../../shared/utils/monacoTheme";
+import { useSiteMonacoTheme } from "../../../shared/hooks/useSiteMonacoTheme";
+import { formatCOutput, getCRuntimeError, runCCode } from "./runC";
+import ChallengeCompleteCelebration from "./ChallengeCompleteCelebration";
+import { useChallengeCelebration } from "./useChallengeCelebration";
+import { useChallengeTelemetry } from "./challengeTelemetry";
+import PolyGuardPanel from "../../polyguard/components/PolyGuardPanel";
+import { buildRuntimeFailureResults } from "./buildRuntimeTestResults";
+
+function normalizeWhitespace(value = "") {
+  return value.replace(/\s+/g, "");
+}
+
+function normalizeOutput(value = "") {
+  return String(value)
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .trim();
+}
+
+function isOutputTest(test) {
+  return test.expectedOutput != null || test.outputIncludes != null;
+}
+
+function keywordsPass(test, code) {
+  const keywords = test.keywords || [];
+  return keywords.every((keyword) => {
+    if (typeof keyword === "string") {
+      return (
+        code.includes(keyword) ||
+        normalizeWhitespace(code).includes(normalizeWhitespace(keyword))
+      );
+    }
+    if (keyword?.pattern) {
+      return new RegExp(keyword.pattern, keyword.flags || "").test(code);
+    }
+    return true;
+  });
+}
+
+/**
+ * A test can check the program's output (`expectedOutput` exact match,
+ * `outputIncludes` substrings) and/or the source (`keywords`). A test with
+ * no checks passes once the program compiles and exits with code 0.
+ */
+function testPasses(test, code, stdout) {
+  if (!keywordsPass(test, code)) return false;
+
+  const output = normalizeOutput(stdout);
+  if (
+    test.expectedOutput != null &&
+    output !== normalizeOutput(test.expectedOutput)
+  ) {
+    return false;
+  }
+  if (test.outputIncludes != null) {
+    const parts = [].concat(test.outputIncludes);
+    if (!parts.every((part) => output.includes(normalizeOutput(part)))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Used when the program fails to compile or run: output checks can't pass.
+function staticTestPasses(test, code) {
+  return !isOutputTest(test) && keywordsPass(test, code);
+}
+
+export default function CCodeChallenge({
+  challenge,
+  lessonId,
+  lessonTitle,
+  accentColor,
+  isCompleted,
+  onComplete,
+  initialCode,
+  onCodeChange,
+}) {
+  const { loading: authLoading, isAuthenticated } = useAuth();
+  const canRun = isAuthenticated && !authLoading;
+  const reportChallengeResult = useChallengeTelemetry();
+
+  const challengeId = challenge.id || lessonId;
+  const title = challenge.title || lessonTitle || "C Challenge";
+  const description = challenge.description || challenge.instructions;
+  const solutionCode = challenge.solutionCode || challenge.solution || "";
+  const tests = challenge.tests || [];
+  const stdin = challenge.stdin || "";
+
+  const [code, setCode] = useState(initialCode || challenge.starterCode);
+  const [results, setResults] = useState(null);
+  const [output, setOutput] = useState(null);
+  const [showSolution, setShowSolution] = useState(false);
+  // Read by the editor's onChange: Monaco fires it with the solution text when
+  // swapping it in, before the handler closure sees showSolution=true.
+  const showSolutionRef = useRef(false);
+  showSolutionRef.current = showSolution;
+  const [running, setRunning] = useState(false);
+  const [submitGeneration, setSubmitGeneration] = useState(0);
+  const activeChallengeId = useRef(challengeId);
+  const runTestsRef = useRef(null);
+  const { showCelebration, triggerCelebration, dismissCelebration } =
+    useChallengeCelebration(challengeId);
+  const { monacoTheme, beforeMount } = useSiteMonacoTheme();
+
+  useEffect(() => {
+    const challengeChanged = activeChallengeId.current !== challengeId;
+    if (challengeChanged) {
+      activeChallengeId.current = challengeId;
+      setCode(initialCode || challenge.starterCode);
+      setResults(null);
+      setOutput(null);
+      setShowSolution(false);
+      setSubmitGeneration(0);
+      return;
+    }
+
+    if (typeof initialCode === "string") {
+      setCode((currentCode) =>
+        currentCode === challenge.starterCode ? initialCode : currentCode,
+      );
+    }
+  }, [challengeId, challenge.starterCode, initialCode]);
+
+  function failRun(message, hint, expectedOutput) {
+    setResults(
+      buildRuntimeFailureResults(
+        { tests },
+        code,
+        solutionCode,
+        staticTestPasses,
+        { runtimeLabel: "C compiles and runs without errors", runtimeHint: hint },
+      ),
+    );
+    setOutput({ status: "fail", stdout: message, expected: expectedOutput });
+    reportChallengeResult?.(false);
+    setRunning(false);
+    setSubmitGeneration((value) => value + 1);
+  }
+
+  function runTests() {
+    if (!canRun || running || showSolution) return;
+
+    setRunning(true);
+    setResults(null);
+    setOutput({
+      status: "running",
+      stdout: "Compiling and running C…",
+    });
+
+    window.setTimeout(async () => {
+      let expectedOutput = "";
+      if (solutionCode) {
+        try {
+          expectedOutput = formatCOutput(await runCCode(solutionCode, stdin));
+        } catch {
+          expectedOutput = "";
+        }
+      }
+
+      let runResult;
+      try {
+        runResult = await runCCode(code, stdin);
+      } catch (error) {
+        failRun(
+          error.message || "Run failed",
+          error.message || "Could not run C.",
+          expectedOutput,
+        );
+        return;
+      }
+
+      const runtimeError = getCRuntimeError(runResult);
+      if (runtimeError) {
+        failRun(
+          [runResult.stdout, runtimeError].filter(Boolean).join("\n").trim(),
+          "Fix the error in Output, then run again.",
+          expectedOutput,
+        );
+        return;
+      }
+
+      const stdout = runResult.stdout || "";
+      const testResults = tests.map((test) => ({
+        ...test,
+        passed: testPasses(test, code, stdout),
+      }));
+
+      const allPassed = testResults.every((test) => test.passed);
+
+      setResults({ passed: allPassed, tests: testResults });
+      setOutput({
+        status: allPassed ? "pass" : "fail",
+        stdout: formatCOutput(runResult) || "Program ran (no printed output).",
+        expected: expectedOutput,
+      });
+
+      if (allPassed) {
+        reportChallengeResult?.(true);
+        triggerCelebration();
+        if (!isCompleted) {
+          Promise.resolve(onComplete()).catch((error) => {
+            console.error("Unable to save lesson progress:", error);
+          });
+        }
+      } else {
+        reportChallengeResult?.(false);
+      }
+
+      setRunning(false);
+      setSubmitGeneration((value) => value + 1);
+    }, 600);
+  }
+
+  useEffect(() => {
+    runTestsRef.current = runTests;
+  });
+
+  function handleEditorMount(editor, monaco) {
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      if (canRun) runTestsRef.current?.();
+    });
+  }
+
+  function resetCode() {
+    setCode(challenge.starterCode);
+    onCodeChange?.(challenge.starterCode);
+    setResults(null);
+    setOutput(null);
+    setShowSolution(false);
+  }
+
+  return (
+    <div className="oops-challenge">
+      <ChallengeCompleteCelebration
+        show={showCelebration}
+        onDismiss={dismissCelebration}
+      />
+      <div className="oops-problem-panel">
+        <div className="oops-problem-header">
+          <h3 className="oops-problem-title">{title}</h3>
+          {canRun && isCompleted && (
+            <span
+              className="oops-problem-solved"
+              style={{ color: accentColor }}
+            >
+              ✓ Solved
+            </span>
+          )}
+        </div>
+        {Array.isArray(description) ? (
+          <div className="oops-problem-desc">
+            {description.map((block, i) => {
+              if (block.type === "text")
+                return (
+                  <p key={i} style={{ marginBottom: "10px" }}>
+                    {block.content}
+                  </p>
+                );
+              if (block.type === "code")
+                return (
+                  <pre
+                    key={i}
+                    style={{
+                      background: "rgba(0,0,0,0.3)",
+                      padding: "10px 14px",
+                      borderRadius: "7px",
+                      fontSize: "0.82rem",
+                      margin: "8px 0",
+                      overflowX: "auto",
+                    }}
+                  >
+                    <code>{block.content}</code>
+                  </pre>
+                );
+              return null;
+            })}
+          </div>
+        ) : (
+          <p className="oops-problem-desc">{description}</p>
+        )}
+
+        {!canRun && (
+          <div className="oops-auth-gate">
+            <p>
+              You can write code in the editor. Sign in or create an account to
+              run, submit, save progress, and mark lessons complete.
+            </p>
+            <div className="oops-auth-gate-actions">
+              <Link to="/login" className="oops-auth-gate-btn">
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="oops-auth-gate-btn oops-auth-gate-btn-primary"
+              >
+                Sign up
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <div className="oops-test-cases">
+          <div className="oops-test-cases-label">Acceptance Tests</div>
+          {(results ? results.tests : tests).map((t) => (
+            <div
+              key={t.id}
+              className={`oops-test-row ${
+                results ? (t.passed ? "oops-test-pass" : "oops-test-fail") : ""
+              }`}
+            >
+              <span className="oops-test-icon">
+                {results ? (t.passed ? "✓" : "✗") : "○"}
+              </span>
+              <span className="oops-test-label">{t.label}</span>
+              {results && !t.passed && t.hint && (
+                <span className="oops-test-hint">Hint: {t.hint}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={`oops-output-panel ${
+            output?.status ? `oops-output-${output.status}` : ""
+          }`}
+        >
+          <div className="oops-output-head">
+            <span>Output</span>
+            <small>{output ? "after last run" : "waiting for run"}</small>
+          </div>
+          <pre className="oops-output-body">
+            {output?.stdout || "Run your code to see output here."}
+          </pre>
+          <PolyGuardPanel
+            code={showSolution ? solutionCode : code}
+            language="c"
+            variant="learn"
+            disabled={!canRun || showSolution}
+            resetKey={`${challengeId}:${showSolution ? "solution" : "code"}`}
+            autoRunKey={submitGeneration || null}
+            hideManualTrigger
+            analysisContext={{
+              testResults: results,
+              runtimeError:
+                output?.status === "fail" ? output?.stdout : "",
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="oops-editor-panel">
+        <div className="oops-editor-topbar">
+          <span className="oops-editor-lang">C · main.c</span>
+          <div className="oops-editor-actions">
+            <button
+              type="button"
+              className="oops-editor-action"
+              onClick={resetCode}
+            >
+              ↺ Reset
+            </button>
+            <button
+              type="button"
+              className="oops-editor-action"
+              onClick={() => setShowSolution(!showSolution)}
+              disabled={!canRun || !solutionCode}
+            >
+              {showSolution ? "Hide Solution" : "Solution"}
+            </button>
+          </div>
+        </div>
+
+        <div className="oops-editor">
+          <Editor
+            height="100%"
+            language="c"
+            value={showSolution ? solutionCode : code}
+            beforeMount={beforeMount}
+            onMount={handleEditorMount}
+            theme={monacoTheme}
+            onChange={(value) => {
+              if (!showSolutionRef.current) {
+                const next = value || "";
+                setCode(next);
+                if (isAuthenticated) onCodeChange?.(next);
+              }
+            }}
+            options={getVSCodeEditorOptions({
+              fontSize: 14,
+              readOnly: showSolution,
+            })}
+          />
+        </div>
+
+        <div className="oops-run-bar">
+          {results && (
+            <div
+              className={`oops-verdict ${results.passed ? "oops-verdict-pass" : "oops-verdict-fail"}`}
+            >
+              {results.passed
+                ? "✓ All tests passed!"
+                : `${results.tests.filter((t) => t.passed).length}/${results.tests.length} tests passed`}
+            </div>
+          )}
+          <button
+            type="button"
+            className="oops-run-btn"
+            style={{ "--accent": accentColor }}
+            onClick={runTests}
+            disabled={!canRun || running || showSolution}
+            title={!canRun ? "Sign in or sign up to run and submit" : undefined}
+          >
+            {authLoading
+              ? "Checking sign-in…"
+              : running
+                ? "⟳ Running…"
+                : canRun
+                  ? "▶ Run & Submit"
+                  : "Sign in to run & submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

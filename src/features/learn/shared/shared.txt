@@ -1,0 +1,3014 @@
+================================================================================
+START OF FOLDER: shared
+================================================================================
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+Root: C:\QuantumLogics\PolyCode\frontend\src\features\learn\shared
+
+shared/
+├── allCourses.js
+├── annotationCursors.js
+├── applyLessonVideoLinks.js
+├── challenge-complete.css
+├── ChallengeCompleteCelebration.jsx
+├── CourseCertificate.jsx
+├── LearnNavContext.js
+├── LearnProfileMenu.jsx
+├── LessonAnnotator.jsx
+├── LessonChallengeTab.jsx
+├── LessonContentShell.jsx
+├── LessonReadGate.jsx
+├── LessonVideo.jsx
+├── runCpp.js
+├── runCsharp.js
+├── runJavaScript.js
+├── RunnableCodeBlock.jsx
+├── runPython.js
+├── useChallengeCelebration.js
+├── useLessonReadGate.js
+├── VerifyCertificatePage.jsx
+└── youtubeUtils.js
+
+Total files: 22
+
+================================================================================
+FILE CONTENTS
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: /allCourses.js
+--------------------------------------------------------------------------------
+import { languageCourses } from "../../language/courseCatalog";
+
+/** Flattens every course across all languages into one list,
+ *  de-duplicated by href, for use in Navbar + landing slider.
+ *  Add a new course only in courseCatalog.js -> it appears here automatically. */
+export const ALL_COURSES = Object.values(languageCourses)
+  .flat()
+  .reduce((acc, course) => {
+    if (!acc.some((c) => c.href === course.href)) acc.push(course);
+    return acc;
+  }, []);
+
+
+--------------------------------------------------------------------------------
+FILE: /annotationCursors.js
+--------------------------------------------------------------------------------
+export const DEFAULT_PENCIL_COLOR = "#ffe566";
+export const DEFAULT_HIGHLIGHTER_COLOR = "#ffe566";
+export const DEFAULT_LASER_COLOR = "#ff3344";
+
+function svgCursor(svg, hotspotX, hotspotY, fallback = "crosshair") {
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hotspotX} ${hotspotY}, ${fallback}`;
+}
+
+/* =========================
+   PENCIL
+   ========================= */
+
+export function getPencilCursor(color = DEFAULT_PENCIL_COLOR) {
+  return svgCursor(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+      <g transform="translate(18 18) rotate(-45) translate(-18 -18)">
+        
+        <rect
+          x="15"
+          y="6"
+          width="6"
+          height="18"
+          rx="1"
+          fill="${color}"
+          stroke="#8a6528"
+          stroke-width="0.8"
+        />
+
+        <rect
+          x="15"
+          y="4"
+          width="6"
+          height="3"
+          rx="0.6"
+          fill="#ff9bb3"
+          stroke="#7a4554"
+          stroke-width="0.6"
+        />
+
+        <rect
+          x="15"
+          y="7"
+          width="6"
+          height="2"
+          fill="#cfcfcf"
+          stroke="#666"
+          stroke-width="0.4"
+        />
+
+        <path
+          d="M15 24 L18 31 L21 24 Z"
+          fill="#e3c19a"
+          stroke="#7a5a36"
+          stroke-width="0.6"
+        />
+
+        <path
+          d="M17 28 L18 31 L19 28 Z"
+          fill="#111"
+        />
+      </g>
+    </svg>`,
+    6,
+    30,
+  );
+}
+
+export const PENCIL_CURSOR = getPencilCursor();
+
+/* =========================
+   ERASER
+   ========================= */
+
+export const ERASER_CURSOR = svgCursor(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+    <g transform="translate(18 18) rotate(-25) translate(-18 -18)">
+      
+      <rect
+        x="9"
+        y="13"
+        width="18"
+        height="10"
+        rx="2"
+        fill="#ffb7c5"
+        stroke="#8a4d5c"
+        stroke-width="1"
+      />
+
+      <rect
+        x="9"
+        y="13"
+        width="5"
+        height="10"
+        rx="1"
+        fill="#ff95aa"
+      />
+
+      <rect
+        x="14"
+        y="13"
+        width="13"
+        height="10"
+        rx="1"
+        fill="#d9ecff"
+      />
+    </g>
+  </svg>`,
+  18,
+  18,
+);
+
+/* =========================
+   HIGHLIGHTER
+   ========================= */
+
+export function getHighlighterCursor(color = DEFAULT_HIGHLIGHTER_COLOR) {
+  return svgCursor(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38">
+      <g transform="translate(19 19) rotate(-45) translate(-19 -19)">
+
+        <rect
+          x="14"
+          y="8"
+          width="10"
+          height="14"
+          rx="2"
+          fill="${color}"
+          stroke="#666"
+          stroke-width="0.8"
+        />
+
+        <rect
+          x="15"
+          y="22"
+          width="8"
+          height="5"
+          rx="1"
+          fill="#222"
+        />
+
+        <path
+          d="M15 27 L19 33 L23 27 Z"
+          fill="#111"
+        />
+      </g>
+    </svg>`,
+    10,
+    30,
+  );
+}
+
+export const HIGHLIGHTER_CURSOR = getHighlighterCursor();
+
+/* =========================
+   LASER
+   ========================= */
+
+export function getLaserCursor(color = DEFAULT_LASER_COLOR) {
+  return svgCursor(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+      
+      <circle
+        cx="16"
+        cy="16"
+        r="4"
+        fill="${color}"
+        opacity="0.95"
+      />
+
+      <circle
+        cx="16"
+        cy="16"
+        r="8"
+        fill="none"
+        stroke="${color}"
+        stroke-width="1"
+        opacity="0.35"
+      />
+
+      <circle
+        cx="16"
+        cy="16"
+        r="12"
+        fill="none"
+        stroke="${color}"
+        stroke-width="0.8"
+        opacity="0.15"
+      />
+      
+    </svg>`,
+    16,
+    16,
+  );
+}
+
+export const LASER_CURSOR = getLaserCursor();
+
+/* =========================
+   TEXT
+   ========================= */
+
+export const TEXT_CURSOR = "text";
+
+/* =========================
+   TOOL MAP
+   ========================= */
+
+export const TOOL_CURSORS = {
+  pencil: PENCIL_CURSOR,
+  highlighter: HIGHLIGHTER_CURSOR,
+  eraser: ERASER_CURSOR,
+  laser: LASER_CURSOR,
+  text: TEXT_CURSOR,
+};
+
+/* =========================
+   COLOR PRESETS
+   ========================= */
+
+export const MAIN_COLOR_PRESETS = [
+  "#ffe566",
+  "#ff4757",
+  "#3794ff",
+  "#4ade80",
+  "#c084fc",
+  "#ff8fab",
+];
+
+/* =========================
+   STORAGE
+   ========================= */
+
+const PREFS_KEY = "polycode_annotation_prefs";
+
+export function loadAnnotationPrefs() {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+
+    if (!raw) {
+      return {
+        pencilColor: DEFAULT_PENCIL_COLOR,
+
+        highlighterColor: DEFAULT_HIGHLIGHTER_COLOR,
+
+        laserColor: DEFAULT_LASER_COLOR,
+      };
+    }
+
+    const parsed = JSON.parse(raw);
+
+    return {
+      pencilColor: parsed.pencilColor || DEFAULT_PENCIL_COLOR,
+
+      highlighterColor: parsed.highlighterColor || DEFAULT_HIGHLIGHTER_COLOR,
+
+      laserColor: parsed.laserColor || DEFAULT_LASER_COLOR,
+    };
+  } catch {
+    return {
+      pencilColor: DEFAULT_PENCIL_COLOR,
+
+      highlighterColor: DEFAULT_HIGHLIGHTER_COLOR,
+
+      laserColor: DEFAULT_LASER_COLOR,
+    };
+  }
+}
+
+export function saveAnnotationPrefs(prefs) {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /applyLessonVideoLinks.js
+--------------------------------------------------------------------------------
+/**
+ * Attach videoUrl from a links map onto flattened lesson objects.
+ * Map values can be a string URL or { videoUrl: "..." }.
+ */
+export function applyLessonVideoLinks(lessons, videoLinks = {}) {
+  return lessons.map((lesson) => {
+    const entry = videoLinks[lesson.id];
+    const url = (
+      typeof entry === "string" ? entry : entry?.videoUrl || ""
+    ).trim();
+
+    if (!url) return lesson;
+    return { ...lesson, videoUrl: url };
+  });
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /challenge-complete.css
+--------------------------------------------------------------------------------
+.oops-challenge {
+  position: relative;
+}
+
+.challenge-complete-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(6, 10, 18, 0.72);
+  backdrop-filter: blur(6px);
+  border-radius: 14px;
+}
+
+.challenge-complete-card {
+  --celebrate-accent: #22c55e;
+  --celebrate-accent-soft: #86efac;
+  --celebrate-accent-glow: rgba(34, 197, 94, 0.35);
+  width: min(100%, 320px);
+  padding: 28px 24px 22px;
+  text-align: center;
+  border-radius: 18px;
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  background: linear-gradient(
+    165deg,
+    rgba(22, 28, 42, 0.98) 0%,
+    rgba(12, 16, 26, 0.98) 100%
+  );
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 40px var(--celebrate-accent-glow);
+}
+
+.challenge-complete-icon {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 14px;
+}
+
+.challenge-complete-svg {
+  width: 88px;
+  height: 88px;
+  display: block;
+}
+
+.challenge-complete-circle {
+  stroke: var(--celebrate-accent-soft);
+}
+
+.challenge-complete-check {
+  stroke: var(--celebrate-accent);
+}
+
+.challenge-complete-spark {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 197, 94, 0.35);
+  pointer-events: none;
+}
+
+.challenge-complete-title {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f4f7ff;
+  letter-spacing: -0.02em;
+}
+
+.challenge-complete-message {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--celebrate-accent);
+}
+
+.challenge-complete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #052e16;
+  background: var(--celebrate-accent);
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.challenge-complete-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.challenge-complete-btn:active {
+  transform: translateY(0);
+}
+
+.daily-challenges-container .challenge-complete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  border-radius: 0;
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /ChallengeCompleteCelebration.jsx
+--------------------------------------------------------------------------------
+import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import "./challenge-complete.css";
+
+export default function ChallengeCompleteCelebration({
+  show,
+  title = "Challenge complete!",
+  message = "Go ahead!",
+  onDismiss,
+}) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          className="challenge-complete-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          onClick={onDismiss}
+          role="presentation"
+        >
+          <motion.div
+            className="challenge-complete-card"
+            initial={{ opacity: 0, scale: 0.82, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 12 }}
+            transition={{ type: "spring", stiffness: 320, damping: 24 }}
+            onClick={(event) => event.stopPropagation()}
+            role="status"
+            aria-live="polite"
+          >
+            <div className="challenge-complete-icon" aria-hidden="true">
+              <motion.svg
+                viewBox="0 0 72 72"
+                className="challenge-complete-svg"
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 280, damping: 18 }}
+              >
+                <motion.circle
+                  cx="36"
+                  cy="36"
+                  r="32"
+                  className="challenge-complete-circle"
+                  fill="none"
+                  strokeWidth="3"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.55, ease: "easeOut" }}
+                />
+                <motion.path
+                  d="M22 37 L32 47 L50 27"
+                  className="challenge-complete-check"
+                  fill="none"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.35, ease: "easeOut" }}
+                />
+              </motion.svg>
+              <motion.span
+                className="challenge-complete-spark"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.85] }}
+                transition={{ delay: 0.55, duration: 0.45 }}
+              />
+            </div>
+
+            <motion.h3
+              className="challenge-complete-title"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.3 }}
+            >
+              {title}
+            </motion.h3>
+
+            <motion.p
+              className="challenge-complete-message"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.58, duration: 0.35 }}
+            >
+              {message}
+            </motion.p>
+
+            <motion.button
+              type="button"
+              className="challenge-complete-btn"
+              onClick={onDismiss}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.72, duration: 0.3 }}
+            >
+              Go ahead
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /CourseCertificate.jsx
+--------------------------------------------------------------------------------
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../../auth/context/AuthContext";
+
+function generateLocalCertId(userId, courseName) {
+  const slug = courseName
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .slice(0, 20);
+  const suffix = String(userId || "guest")
+    .slice(-6)
+    .toUpperCase();
+  return `PC-${slug}-${suffix}-${Date.now().toString(36).toUpperCase()}`;
+}
+
+export default function CourseCertificate({
+  courseName,
+  totalLessons,
+  completedCount,
+  earnedXP,
+}) {
+  const { user } = useAuth();
+  const certificateRef = useRef();
+  const certId = useRef(null);
+
+  const [qrDataUrl, setQrDataUrl] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const isComplete = completedCount >= totalLessons;
+
+  const userName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.username || "Learner";
+
+  const issueDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  useEffect(() => {
+    if (!isComplete) return;
+    let cancelled = false;
+
+    if (!certId.current) {
+      certId.current = generateLocalCertId(user?._id || user?.id, courseName);
+    }
+
+    const queryParams = new URLSearchParams({
+      id: certId.current,
+      name: userName,
+      course: courseName,
+      date: issueDate,
+      lessons: totalLessons.toString(),
+      xp: earnedXP.toString(),
+    }).toString();
+
+    const qrUrl = `https://poly-code-frontend-tau.vercel.app//verify-certificate?${queryParams}`;
+
+    async function generateQrCode() {
+      try {
+        const qrcodeModule = await import("qrcode");
+        const toDataURL =
+          qrcodeModule.toDataURL || qrcodeModule.default?.toDataURL;
+        if (!toDataURL) throw new Error("QR generator unavailable");
+
+        const dataUrl = await toDataURL(qrUrl, {
+          width: 120,
+          margin: 1,
+          color: { dark: "#1e293b", light: "#ffffff" },
+        });
+        if (!cancelled) setQrDataUrl(dataUrl);
+      } catch (err) {
+        console.error("QR Generation Error:", err);
+      }
+    }
+
+    generateQrCode();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isComplete,
+    courseName,
+    user,
+    userName,
+    issueDate,
+    totalLessons,
+    earnedXP,
+  ]);
+
+  async function downloadPDF() {
+    if (!certificateRef.current) return;
+    setDownloading(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 4,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+      pdf.addImage(
+        imgData,
+        "PNG",
+        0,
+        0,
+        pdf.internal.pageSize.getWidth(),
+        pdf.internal.pageSize.getHeight(),
+      );
+      pdf.setProperties({
+        title: `${courseName} Certificate`,
+        subject: `Certificate ID: ${certId.current}`,
+        author: "PolyCode",
+      });
+      pdf.save(`${courseName.replace(/\s+/g, "-")}-${certId.current}.pdf`);
+    } catch (err) {
+      console.error("PDF error:", err.message);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  if (!isComplete) return null;
+
+  return (
+    <div className="certificate-wrapper">
+      <div className="certificate" ref={certificateRef}>
+        <div className="certificate-watermark">
+          <img src="/images/polycode-logo.png" alt="" />
+        </div>
+
+        <div className="certificate-header">
+          <img
+            src="/images/polycode-logo.png"
+            alt="PolyCode"
+            className="certificate-logo1"
+          />
+          <img
+            src="/images/logo.png"
+            alt="QuantumLogics"
+            className="certificate-logo2"
+          />
+        </div>
+
+        <div className="certificate-company">
+          PolyCode powered by QuantumLogics
+        </div>
+        <h1 className="certificate-title">CERTIFICATE OF COMPLETION</h1>
+        <div className="cert-divider">✦ ✦ ✦</div>
+        <p className="certificate-awarded">
+          This certificate is proudly awarded to
+        </p>
+        <h2 className="certificate-name">{userName}</h2>
+        <p className="certificate-text">For successfully completing</p>
+        <h3 className="certificate-course">{courseName}</h3>
+
+        <div className="certificate-stats">
+          <div>
+            <strong>{completedCount}</strong>
+            <span>Lessons Completed</span>
+          </div>
+          <div>
+            <strong>{earnedXP}</strong>
+            <span>XP Earned</span>
+          </div>
+        </div>
+
+        <div className="certificate-info">
+          <div>
+            <strong>Issued On</strong>
+            <p>{issueDate}</p>
+          </div>
+          <div>
+            <strong>Certificate ID</strong>
+            <p style={{ fontSize: "0.7em", wordBreak: "break-all" }}>
+              {certId.current}
+            </p>
+          </div>
+        </div>
+
+        <div className="certificate-footer">
+          <div className="signature-block">
+            <img
+              src="/images/aminasign.png"
+              alt="Signature"
+              className="signature-image"
+            />
+            <div className="signature-line" />
+            <p className="signature-name">Amina</p>
+            <p className="signature-role">Course Instructor</p>
+          </div>
+
+          {qrDataUrl && (
+            <div className="certificate-qr-footer">
+              <img
+                src={qrDataUrl}
+                alt="Scan to verify"
+                width={80}
+                height={80}
+              />
+              <p>Scan to verify</p>
+            </div>
+          )}
+
+          <img
+            src="/images/stamp.png"
+            alt="Official Stamp"
+            className="official-stamp"
+          />
+        </div>
+      </div>
+
+      <div className="certificate-actions">
+        <button
+          className="download-btn"
+          onClick={downloadPDF}
+          disabled={downloading}
+        >
+          {downloading ? "Generating PDF…" : "⬇ Download PDF"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /LearnNavContext.js
+--------------------------------------------------------------------------------
+import React, { createContext, useContext } from "react";
+
+const LearnNavContext = createContext({
+  menuOpen: false,
+  closeMenu: () => {},
+});
+
+export function LearnNavProvider({ menuOpen, closeMenu, children }) {
+  return (
+    <LearnNavContext.Provider value={{ menuOpen, closeMenu }}>
+      {children}
+    </LearnNavContext.Provider>
+  );
+}
+
+export function useLearnNav() {
+  return useContext(LearnNavContext);
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /LearnProfileMenu.jsx
+--------------------------------------------------------------------------------
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ProfileAvatar from "../../profile/components/ProfileAvatar";
+
+export default function LearnProfileMenu({
+  user,
+  trackTitle,
+  syncLabel,
+  completedCount,
+  totalLessons,
+  earnedXP,
+  totalXP,
+  bookmarksCount,
+  streak = 0,
+}) {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const pct = Math.round((completedCount / totalLessons) * 100) || 0;
+  return (
+    <div className="learn-profile-menu">
+      <button
+        type="button"
+        className="learn-profile-btn"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-label="Open learning profile"
+      >
+        <ProfileAvatar user={user} size="sm" />
+      </button>
+
+      {open && (
+        <div className="learn-profile-popover">
+          <div className="learn-profile-head">
+            <div className="learn-profile-avatar">
+              <ProfileAvatar user={user} size="sm" />
+            </div>
+            <div>
+              <strong>{user?.username || "Guest learner"}</strong>
+              <small>{trackTitle}</small>
+            </div>
+          </div>
+
+          <div className="learn-profile-progress">
+            <div>
+              <span>Progress</span>
+              <strong>{pct}%</strong>
+            </div>
+            <div className="learn-profile-track">
+              <div style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+
+          <div className="learn-profile-grid">
+            <div>
+              <span>Lessons</span>
+              <strong>
+                {completedCount}/{totalLessons}
+              </strong>
+            </div>
+            <div>
+              <span>XP</span>
+              <strong>
+                {earnedXP}/{totalXP}
+              </strong>
+            </div>
+            <div>
+              <span>Streak</span>
+              <strong>{streak} days</strong>
+            </div>
+            <div>
+              <span>Saved</span>
+              <strong>{bookmarksCount}</strong>
+            </div>
+          </div>
+
+          <div className="learn-profile-sync">{syncLabel}</div>
+          <button
+            type="button"
+            className="learn-profile-view-btn"
+            onClick={() => navigate(user?.username ? `/@${user.username}` : "/profile")}
+          >
+            View full profile
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /LessonAnnotator.jsx
+--------------------------------------------------------------------------------
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Eraser,
+  GripVertical,
+  MousePointer2,
+  Pencil,
+  PenLine,
+  Trash2,
+  Type,
+  X,
+  Zap,
+} from "lucide-react";
+import {
+  DEFAULT_PENCIL_COLOR,
+  getPencilCursor,
+  loadAnnotationPrefs,
+  MAIN_COLOR_PRESETS,
+  saveAnnotationPrefs,
+  TOOL_CURSORS,
+} from "./annotationCursors";
+
+const STAGE_INTERACTIVE_SELECTOR =
+  ".lesson-annotator-text-input, .lesson-annotator-label, .lesson-annotator-fab-wrap, .numpy-notes-panel, .oops-notes-panel, .numpy-confidence-panel, .numpy-mark-read-panel, .numpy-theory-actions, .lesson-read-gate, .lesson-confidence-panel, .lesson-read-actions, textarea, input, select, button, a";
+
+const TOOLS = {
+  POINTER: "pointer",
+  PENCIL: "pencil",
+  LASER: "laser",
+  TEXT: "text",
+  ERASER: "eraser",
+};
+
+const TOOL_ITEMS = [
+  { id: TOOLS.POINTER, label: "Pointer", Icon: MousePointer2 },
+  { id: TOOLS.PENCIL, label: "Pencil", Icon: Pencil },
+  { id: TOOLS.LASER, label: "Laser", Icon: Zap },
+  { id: TOOLS.TEXT, label: "Text", Icon: Type },
+  { id: TOOLS.ERASER, label: "Eraser", Icon: Eraser },
+];
+
+const STROKE_WIDTH = 3;
+const ERASER_RADIUS = 14;
+const DRAG_THRESHOLD = 4;
+
+function loadAnnotations(storageKey) {
+  if (!storageKey) return { strokes: [], labels: [] };
+  try {
+    const raw = localStorage.getItem(`polycode_annotations_${storageKey}`);
+    if (!raw) return { strokes: [], labels: [] };
+    const parsed = JSON.parse(raw);
+    return {
+      strokes: Array.isArray(parsed.strokes) ? parsed.strokes : [],
+      labels: Array.isArray(parsed.labels) ? parsed.labels : [],
+    };
+  } catch {
+    return { strokes: [], labels: [] };
+  }
+}
+
+function saveAnnotations(storageKey, data) {
+  if (!storageKey) return;
+  localStorage.setItem(
+    `polycode_annotations_${storageKey}`,
+    JSON.stringify(data),
+  );
+}
+
+function getPoint(event, stage) {
+  const rect = stage.getBoundingClientRect();
+  const clientX = event.touches?.[0]?.clientX ?? event.clientX;
+  const clientY = event.touches?.[0]?.clientY ?? event.clientY;
+  return {
+    x: clientX - rect.left + stage.scrollLeft,
+    y: clientY - rect.top + stage.scrollTop,
+  };
+}
+
+function drawStroke(ctx, stroke) {
+  if (!stroke.points?.length) return;
+  ctx.strokeStyle = stroke.color || DEFAULT_PENCIL_COLOR;
+  ctx.lineWidth = stroke.width || STROKE_WIDTH;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(stroke.points[0][0], stroke.points[0][1]);
+  stroke.points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+  ctx.stroke();
+}
+
+function distanceToSegment(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  if (dx === 0 && dy === 0) {
+    return Math.hypot(px - x1, py - y1);
+  }
+  const t = Math.max(
+    0,
+    Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)),
+  );
+  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+}
+
+function strokeNearPoint(stroke, point, radius) {
+  const points = stroke.points || [];
+  for (let i = 1; i < points.length; i += 1) {
+    const [x1, y1] = points[i - 1];
+    const [x2, y2] = points[i];
+    if (distanceToSegment(point.x, point.y, x1, y1, x2, y2) <= radius) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function normalizeHex(color = "") {
+  return color.trim().toLowerCase();
+}
+
+function ColorPicker({ label, value, onChange, compact }) {
+  const paletteInputRef = useRef(null);
+  const isCustomColor = !MAIN_COLOR_PRESETS.some(
+    (preset) => normalizeHex(preset) === normalizeHex(value),
+  );
+
+  return (
+    <div
+      className={`lesson-annotator-color-picker${compact ? " lesson-annotator-color-picker--compact" : ""}`}
+      aria-label={`${label} color`}
+    >
+      {MAIN_COLOR_PRESETS.map((color) => (
+        <button
+          key={color}
+          type="button"
+          className={`lesson-annotator-swatch${
+            normalizeHex(value) === normalizeHex(color) ? " active" : ""
+          }`}
+          style={{ "--swatch": color }}
+          onClick={() => onChange(color)}
+          title={`${label}: ${color}`}
+          aria-label={`${label} color ${color}`}
+        />
+      ))}
+      <button
+        type="button"
+        className={`lesson-annotator-palette-btn${isCustomColor ? " active" : ""}`}
+        style={isCustomColor ? { "--picked-color": value } : undefined}
+        onClick={() => paletteInputRef.current?.click()}
+        title="Choose any color"
+        aria-label={`${label} custom color palette`}
+      />
+      <input
+        ref={paletteInputRef}
+        type="color"
+        className="lesson-annotator-palette-input"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        tabIndex={-1}
+        aria-hidden
+      />
+    </div>
+  );
+}
+
+function AnnotationLabel({
+  label,
+  canAdjust,
+  isEditing,
+  onStartEdit,
+  onSave,
+  onDelete,
+  onMove,
+  stageRef,
+}) {
+  const [draft, setDraft] = useState(label.text);
+  const [livePos, setLivePos] = useState(null);
+  const dragState = useRef(null);
+
+  useEffect(() => {
+    if (isEditing) setDraft(label.text);
+  }, [isEditing, label.text]);
+
+  const finishDrag = useCallback(
+    (event) => {
+      const state = dragState.current;
+      dragState.current = null;
+      setLivePos(null);
+
+      if (!state?.moved) return;
+
+      const stage = stageRef.current;
+      if (!stage) return;
+      const point = getPoint(event, stage);
+      onMove(label.id, {
+        x: state.originX + (point.x - state.startX),
+        y: state.originY + (point.y - state.startY),
+      });
+    },
+    [label.id, onMove, stageRef],
+  );
+
+  useEffect(() => {
+    const onMoveEvent = (event) => {
+      const state = dragState.current;
+      if (!state) return;
+
+      const stage = stageRef.current;
+      if (!stage) return;
+      const point = getPoint(event, stage);
+      const dx = point.x - state.startX;
+      const dy = point.y - state.startY;
+
+      if (!state.moved && Math.hypot(dx, dy) >= DRAG_THRESHOLD) {
+        state.moved = true;
+      }
+
+      if (state.moved) {
+        setLivePos({
+          x: state.originX + dx,
+          y: state.originY + dy,
+        });
+      }
+    };
+
+    const onUp = (event) => finishDrag(event);
+
+    window.addEventListener("mousemove", onMoveEvent);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMoveEvent);
+    window.addEventListener("touchend", onUp);
+
+    return () => {
+      window.removeEventListener("mousemove", onMoveEvent);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMoveEvent);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [finishDrag, stageRef]);
+
+  const handleDragStart = (event) => {
+    if (!canAdjust || isEditing) return;
+    if (event.target.closest(".lesson-annotator-label-edit")) return;
+    event.stopPropagation();
+    event.preventDefault();
+
+    const stage = stageRef.current;
+    if (!stage) return;
+    const point = getPoint(event, stage);
+    dragState.current = {
+      startX: point.x,
+      startY: point.y,
+      originX: label.x,
+      originY: label.y,
+      moved: false,
+    };
+  };
+
+  const position = livePos || { x: label.x, y: label.y };
+
+  if (isEditing) {
+    return (
+      <div
+        className="lesson-annotator-label lesson-annotator-label--editing"
+        style={{ left: position.x, top: position.y }}
+        onMouseDown={(event) => event.stopPropagation()}
+        onTouchStart={(event) => event.stopPropagation()}
+      >
+        <textarea
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          rows={3}
+          autoFocus
+          aria-label="Edit note"
+        />
+        <div className="lesson-annotator-label-actions">
+          <button
+            type="button"
+            onClick={() => onSave(label.id, draft)}
+            disabled={!draft.trim()}
+          >
+            Save
+          </button>
+          <button type="button" onClick={() => onStartEdit(null)}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="lesson-annotator-label-delete"
+            onClick={() => onDelete(label.id)}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`lesson-annotator-label${canAdjust ? " lesson-annotator-label--interactive" : ""}${livePos ? " lesson-annotator-label--dragging" : ""}`}
+      style={{ left: position.x, top: position.y }}
+      onMouseDown={handleDragStart}
+      onTouchStart={handleDragStart}
+      onDoubleClick={(event) => {
+        if (!canAdjust) return;
+        event.stopPropagation();
+        onStartEdit(label.id);
+      }}
+    >
+      {canAdjust ? (
+        <span className="lesson-annotator-label-grip" aria-hidden>
+          <GripVertical size={12} />
+        </span>
+      ) : null}
+      <span className="lesson-annotator-label-text">{label.text}</span>
+      {canAdjust ? (
+        <button
+          type="button"
+          className="lesson-annotator-label-edit"
+          onMouseDown={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            onStartEdit(label.id);
+          }}
+          aria-label="Edit note"
+        >
+          <PenLine size={12} />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export default function LessonAnnotator({ storageKey, children }) {
+  const stageRef = useRef(null);
+  const contentRef = useRef(null);
+  const canvasRef = useRef(null);
+  const fabRef = useRef(null);
+  const drawingRef = useRef(false);
+  const currentStrokeRef = useRef(null);
+  const prefsRef = useRef(loadAnnotationPrefs());
+
+  const [tool, setTool] = useState(TOOLS.POINTER);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [pencilColor, setPencilColor] = useState(prefsRef.current.pencilColor);
+  const [laserColor, setLaserColor] = useState(prefsRef.current.laserColor);
+  const [strokes, setStrokes] = useState([]);
+  const [labels, setLabels] = useState([]);
+  const [textDraft, setTextDraft] = useState("");
+  const [pendingTextPoint, setPendingTextPoint] = useState(null);
+  const [laserPoint, setLaserPoint] = useState(null);
+  const [editingLabelId, setEditingLabelId] = useState(null);
+
+  const redrawCanvas = useCallback((nextStrokes) => {
+    const canvas = canvasRef.current;
+    const stage = stageRef.current;
+    if (!canvas || !stage) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    nextStrokes.forEach((stroke) => drawStroke(ctx, stroke));
+  }, []);
+
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const stage = stageRef.current;
+    const content = contentRef.current;
+    if (!canvas || !stage || !content) return;
+
+    const width = stage.clientWidth;
+    const height = content.offsetHeight;
+    const ratio = window.devicePixelRatio || 1;
+
+    canvas.width = Math.max(1, Math.floor(width * ratio));
+    canvas.height = Math.max(1, Math.floor(height * ratio));
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    redrawCanvas(strokes);
+  }, [redrawCanvas, strokes]);
+
+  useEffect(() => {
+    const saved = loadAnnotations(storageKey);
+    setStrokes(saved.strokes);
+    setLabels(saved.labels);
+  }, [storageKey]);
+
+  useEffect(() => {
+    saveAnnotations(storageKey, { strokes, labels });
+  }, [storageKey, strokes, labels]);
+
+  useEffect(() => {
+    saveAnnotationPrefs({ pencilColor, laserColor });
+  }, [pencilColor, laserColor]);
+
+  useEffect(() => {
+    redrawCanvas(strokes);
+  }, [strokes, redrawCanvas]);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    const content = contentRef.current;
+    if (!stage || !content) return undefined;
+
+    resizeCanvas();
+    const observer = new ResizeObserver(resizeCanvas);
+    observer.observe(content);
+    observer.observe(stage);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [resizeCanvas]);
+
+  useEffect(() => {
+    setPendingTextPoint(null);
+    setTextDraft("");
+    setLaserPoint(null);
+    setEditingLabelId(null);
+  }, [tool, storageKey]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const handleOutside = (event) => {
+      if (fabRef.current?.contains(event.target)) return;
+      setMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
+  }, [menuOpen]);
+
+  const eraseAt = useCallback((point) => {
+    setStrokes((prev) =>
+      prev.filter((stroke) => !strokeNearPoint(stroke, point, ERASER_RADIUS)),
+    );
+    setLabels((prev) =>
+      prev.filter(
+        (label) => Math.hypot(label.x - point.x, label.y - point.y) > 24,
+      ),
+    );
+  }, []);
+
+  const isMarkupTool = tool !== TOOLS.POINTER;
+  const canAdjustLabels = tool === TOOLS.POINTER;
+
+  const stageCursor = useMemo(() => {
+    if (tool === TOOLS.PENCIL) return getPencilCursor(pencilColor);
+    if (tool === TOOLS.LASER) return undefined;
+    if (tool === TOOLS.ERASER || tool === TOOLS.TEXT) return TOOL_CURSORS[tool];
+    return undefined;
+  }, [tool, pencilColor]);
+
+  const activeToolItem =
+    TOOL_ITEMS.find((item) => item.id === tool) || TOOL_ITEMS[0];
+  const ActiveIcon = activeToolItem.Icon;
+
+  const selectTool = (nextTool) => {
+    setTool(nextTool);
+    setMenuOpen(false);
+  };
+
+  const handleStageMove = (event) => {
+    if (event.target.closest(STAGE_INTERACTIVE_SELECTOR)) {
+      return;
+    }
+
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    if (tool === TOOLS.LASER) {
+      setLaserPoint(getPoint(event, stage));
+    }
+  };
+
+  const handleStageLeave = () => {
+    setLaserPoint(null);
+    handlePointerUp();
+  };
+
+  const handlePointerDown = (event) => {
+    if (tool === TOOLS.POINTER) return;
+    if (event.target.closest(STAGE_INTERACTIVE_SELECTOR)) {
+      return;
+    }
+
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    event.preventDefault();
+    const point = getPoint(event, stage);
+
+    if (tool === TOOLS.LASER) {
+      setLaserPoint(point);
+      return;
+    }
+
+    if (tool === TOOLS.PENCIL) {
+      drawingRef.current = true;
+      currentStrokeRef.current = {
+        color: pencilColor,
+        width: STROKE_WIDTH,
+        points: [[point.x, point.y]],
+      };
+      return;
+    }
+
+    if (tool === TOOLS.ERASER) {
+      eraseAt(point);
+      drawingRef.current = true;
+      return;
+    }
+
+    if (tool === TOOLS.TEXT) {
+      setPendingTextPoint(point);
+      setTextDraft("");
+      setEditingLabelId(null);
+    }
+  };
+
+  const handlePointerMove = (event) => {
+    const stage = stageRef.current;
+    const canvas = canvasRef.current;
+    if (!stage) return;
+
+    if (tool === TOOLS.LASER) {
+      setLaserPoint(getPoint(event, stage));
+      return;
+    }
+
+    if (!canvas || !drawingRef.current) return;
+
+    event.preventDefault();
+    const point = getPoint(event, stage);
+
+    if (tool === TOOLS.PENCIL && currentStrokeRef.current) {
+      currentStrokeRef.current.points.push([point.x, point.y]);
+      const ctx = canvas.getContext("2d");
+      const pts = currentStrokeRef.current.points;
+      const [x1, y1] = pts[pts.length - 2];
+      const [x2, y2] = pts[pts.length - 1];
+      drawStroke(ctx, {
+        color: pencilColor,
+        width: STROKE_WIDTH,
+        points: [
+          [x1, y1],
+          [x2, y2],
+        ],
+      });
+      return;
+    }
+
+    if (tool === TOOLS.ERASER) {
+      eraseAt(point);
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (tool === TOOLS.PENCIL && currentStrokeRef.current) {
+      const finished = currentStrokeRef.current;
+      if (finished.points.length > 1) {
+        setStrokes((prev) => [...prev, finished]);
+      }
+    }
+    drawingRef.current = false;
+    currentStrokeRef.current = null;
+  };
+
+  const handleAddLabel = () => {
+    const text = textDraft.trim();
+    if (!text || !pendingTextPoint) return;
+
+    const newId = `${Date.now()}`;
+    setLabels((prev) => [
+      ...prev,
+      {
+        id: newId,
+        x: pendingTextPoint.x,
+        y: pendingTextPoint.y,
+        text,
+      },
+    ]);
+    setPendingTextPoint(null);
+    setTextDraft("");
+    setTool(TOOLS.POINTER);
+    setEditingLabelId(newId);
+  };
+
+  const handleSaveLabel = (labelId, text) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setLabels((prev) =>
+      prev.map((label) =>
+        label.id === labelId ? { ...label, text: trimmed } : label,
+      ),
+    );
+    setEditingLabelId(null);
+  };
+
+  const handleMoveLabel = (labelId, position) => {
+    setLabels((prev) =>
+      prev.map((label) =>
+        label.id === labelId ? { ...label, ...position } : label,
+      ),
+    );
+  };
+
+  const handleDeleteLabel = (labelId) => {
+    setLabels((prev) => prev.filter((label) => label.id !== labelId));
+    setEditingLabelId(null);
+  };
+
+  const handleClearAll = () => {
+    setStrokes([]);
+    setLabels([]);
+    setPendingTextPoint(null);
+    setTextDraft("");
+    setLaserPoint(null);
+    setEditingLabelId(null);
+  };
+
+  return (
+    <div
+      className={`lesson-annotator lesson-annotator--tool-${tool}${
+        isMarkupTool ? " lesson-annotator--active" : ""
+      }`}
+    >
+      <div
+        ref={stageRef}
+        className="lesson-annotator-stage"
+        style={stageCursor ? { cursor: stageCursor } : undefined}
+        onMouseDown={handlePointerDown}
+        onMouseMove={(event) => {
+          handleStageMove(event);
+          handlePointerMove(event);
+        }}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handleStageLeave}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
+      >
+        <div ref={contentRef} className="lesson-annotator-content">
+          {children}
+        </div>
+
+        <canvas
+          ref={canvasRef}
+          className={`lesson-annotator-canvas${isMarkupTool && tool !== TOOLS.LASER ? " is-active" : ""}`}
+          style={stageCursor ? { cursor: stageCursor } : undefined}
+          aria-hidden
+        />
+
+        {tool === TOOLS.LASER && laserPoint ? (
+          <div
+            className="lesson-annotator-laser-dot"
+            style={{
+              left: laserPoint.x,
+              top: laserPoint.y,
+              "--laser-color": laserColor,
+            }}
+            aria-hidden
+          />
+        ) : null}
+
+        <div
+          className={`lesson-annotator-labels${canAdjustLabels ? " lesson-annotator-labels--interactive" : ""}`}
+        >
+          {labels.map((label) => (
+            <AnnotationLabel
+              key={label.id}
+              label={label}
+              canAdjust={canAdjustLabels}
+              isEditing={editingLabelId === label.id}
+              onStartEdit={setEditingLabelId}
+              onSave={handleSaveLabel}
+              onDelete={handleDeleteLabel}
+              onMove={handleMoveLabel}
+              stageRef={stageRef}
+            />
+          ))}
+        </div>
+
+        {pendingTextPoint ? (
+          <div
+            className="lesson-annotator-text-input"
+            style={{ left: pendingTextPoint.x, top: pendingTextPoint.y }}
+            onMouseDown={(event) => event.stopPropagation()}
+            onTouchStart={(event) => event.stopPropagation()}
+          >
+            <textarea
+              value={textDraft}
+              onChange={(event) => setTextDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  handleAddLabel();
+                }
+                if (event.key === "Escape") setPendingTextPoint(null);
+              }}
+              placeholder="Type a note..."
+              rows={3}
+              autoFocus
+            />
+            <div className="lesson-annotator-label-actions">
+              <button
+                type="button"
+                onClick={handleAddLabel}
+                disabled={!textDraft.trim()}
+              >
+                Add
+              </button>
+              <button type="button" onClick={() => setPendingTextPoint(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div ref={fabRef} className="lesson-annotator-fab-wrap">
+        <button
+          type="button"
+          className={`lesson-annotator-fab${menuOpen ? " lesson-annotator-fab--open" : ""}`}
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label={menuOpen ? "Close markup tools" : "Open markup tools"}
+          aria-expanded={menuOpen}
+        >
+          <ActiveIcon size={18} aria-hidden />
+        </button>
+
+        {menuOpen ? (
+          <div
+            className="lesson-annotator-fab-menu"
+            role="menu"
+            aria-label="Markup tools"
+          >
+            <div className="lesson-annotator-fab-menu-head">
+              <span>Markup</span>
+              <button
+                type="button"
+                className="lesson-annotator-fab-close"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close tools"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="lesson-annotator-fab-tools">
+              {TOOL_ITEMS.map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="menuitem"
+                  className={tool === id ? "active" : ""}
+                  onClick={() => selectTool(id)}
+                  title={label}
+                >
+                  <Icon size={16} aria-hidden />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+
+            {tool === TOOLS.PENCIL || tool === TOOLS.LASER ? (
+              <div className="lesson-annotator-fab-colors">
+                <span>
+                  {tool === TOOLS.PENCIL ? "Pencil color" : "Laser color"}
+                </span>
+                <ColorPicker
+                  label={tool === TOOLS.PENCIL ? "Pencil" : "Laser"}
+                  value={tool === TOOLS.PENCIL ? pencilColor : laserColor}
+                  onChange={
+                    tool === TOOLS.PENCIL ? setPencilColor : setLaserColor
+                  }
+                  compact
+                />
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              className="lesson-annotator-fab-clear"
+              onClick={handleClearAll}
+            >
+              <Trash2 size={14} aria-hidden />
+              Clear all markup
+            </button>
+
+            {canAdjustLabels ? (
+              <p className="lesson-annotator-fab-hint">
+                Drag notes to move · double-click or ✎ to edit
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /LessonChallengeTab.jsx
+--------------------------------------------------------------------------------
+import React from "react";
+
+export default function LessonChallengeTab({
+  active,
+  locked,
+  xp,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      className={`oops-tab${active ? " active" : ""}${locked ? " oops-tab-locked" : ""}`}
+      onClick={onClick}
+      disabled={locked}
+      title={
+        locked ? "Mark the lesson as read on the Theory tab first" : undefined
+      }
+    >
+      Challenge <span className="oops-tab-xp">+{xp} XP</span>
+    </button>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /LessonContentShell.jsx
+--------------------------------------------------------------------------------
+import React from "react";
+import LessonAnnotator from "./LessonAnnotator";
+import LessonVideo from "./LessonVideo";
+
+/**
+ * Wraps theory/challenge content with optional YouTube video + markup tools.
+ * storageKey should be unique per lesson (e.g. lesson id).
+ */
+export default function LessonContentShell({
+  storageKey,
+  videoUrl,
+  videoTitle,
+  children,
+}) {
+  return (
+    <div className={`oops-lesson-content${videoUrl ? " has-lesson-video" : ""}`}>
+      <LessonAnnotator storageKey={storageKey}>{children}</LessonAnnotator>
+      {videoUrl ? (
+        <LessonVideo url={videoUrl} title={videoTitle} placement="end" />
+      ) : null}
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /LessonReadGate.jsx
+--------------------------------------------------------------------------------
+import React from "react";
+
+const CONFIDENCE_OPTIONS = [
+  ["review", "😅 Need another read"],
+  ["almost", "🙂 Getting it"],
+  ["ready", "🚀 Ready for the challenge"],
+];
+
+/**
+ * Mark-as-read gate, then confidence check + challenge CTA.
+ * Used at the end of theory content across all courses.
+ */
+export default function LessonReadGate({
+  markedAsRead = false,
+  onMarkAsRead,
+  confidence = "",
+  onConfidenceChange,
+  onGoChallenge,
+  accentColor = "#818cf8",
+  challengeLabel = "Ready? Try the coding challenge →",
+}) {
+  if (!markedAsRead) {
+    return (
+      <div
+        className="lesson-read-gate"
+        style={{ "--lesson-accent": accentColor }}
+      >
+        <p className="lesson-read-gate-hint">
+          Finished reading? Mark this lesson as read to unlock the next steps.
+        </p>
+        <button
+          type="button"
+          className="lesson-mark-read-btn"
+          onClick={onMarkAsRead}
+        >
+          Mark as read
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="lesson-confidence-panel">
+        <h3>How do you feel about this lesson?</h3>
+        <div className="lesson-confidence-options">
+          {CONFIDENCE_OPTIONS.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={confidence === value ? "active" : ""}
+              onClick={() => onConfidenceChange(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="lesson-read-actions">
+        <button
+          type="button"
+          className="lesson-challenge-cta"
+          style={{ "--lesson-accent": accentColor }}
+          onClick={onGoChallenge}
+        >
+          {challengeLabel}
+        </button>
+      </div>
+    </>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /LessonVideo.jsx
+--------------------------------------------------------------------------------
+import React from "react";
+import { ExternalLink, PlayCircle } from "lucide-react";
+import {
+  getYouTubeEmbedUrl,
+  getYouTubeWatchUrl,
+} from "./youtubeUtils";
+
+export default function LessonVideo({
+  url,
+  title = "Lesson video",
+  placement = "end",
+}) {
+  const embedUrl = getYouTubeEmbedUrl(url);
+  const watchUrl = getYouTubeWatchUrl(url);
+
+  if (!embedUrl) return null;
+
+  return (
+    <section
+      className={`lesson-video lesson-video--compact lesson-video--${placement}`}
+      aria-label="Lesson video"
+    >
+      <div className="lesson-video-head">
+        <span className="lesson-video-kicker">
+          <PlayCircle size={14} aria-hidden />
+          Video lesson
+        </span>
+        <a
+          href={watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="lesson-video-link"
+        >
+          Open in YouTube <ExternalLink size={14} aria-hidden />
+        </a>
+      </div>
+      <div className="lesson-video-frame">
+        <iframe
+          src={embedUrl}
+          title={title}
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    </section>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /runCpp.js
+--------------------------------------------------------------------------------
+import { getApiBase } from "../../../config/apiBase";
+
+export async function runCppCode(source) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 45000);
+
+  try {
+    const response = await fetch(`${getApiBase()}/challenges/run-cpp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: source }),
+      signal: controller.signal,
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(
+        payload.message || payload.error || "C++ compiler API failed",
+      );
+    }
+    return { result: payload, runtime: "server" };
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("C++ compile timed out. Try shorter code.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export function formatCppOutput(result = {}) {
+  return [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+}
+
+export function getCppRuntimeError(runResult) {
+  return (
+    runResult?.error ||
+    (runResult?.exitCode != null && runResult.exitCode !== 0
+      ? runResult.stderr || "Compilation or run failed"
+      : "")
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /runCsharp.js
+--------------------------------------------------------------------------------
+/**
+ * Evaluates a string of C# code line-by-line using a simulated runtime environment.
+ * Handles variables, assignments, basic updates, and Console.WriteLine output.
+ */
+export async function runCsharpCode(source) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const lines = source.split("\n");
+      const variables = {}; // Local memory store: key -> evaluated primitive value
+      let stdoutLines = [];
+      let openBraces = 0;
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+
+        // Skip comments and empty lines
+        if (!line || line.startsWith("//")) continue;
+
+        // Keep a basic count of scope blocks
+        if (line.includes("{")) openBraces += (line.match(/{/g) || []).length;
+        if (line.includes("}")) openBraces -= (line.match(/}/g) || []).length;
+
+        // Ignore boilerplate infrastructure statements for client-side processing
+        if (
+          line.startsWith("using ") ||
+          line.startsWith("class ") ||
+          line.startsWith("namespace ") ||
+          line.match(/(public|private|static|void|int)\s+Main/)
+        ) {
+          continue;
+        }
+
+        // Clean trailing syntax markers if present
+        const hasSemicolon = line.endsWith(";");
+        const cleanLine = hasSemicolon ? line.slice(0, -1).trim() : line;
+
+        // 1. Check for missing semicolons on expressions (excluding block brackets)
+        if (!hasSemicolon && !line.endsWith("{") && !line.endsWith("}")) {
+          resolve({
+            result: {
+              error: `Compilation Error (CS1002): ; expected on line ${i + 1}`,
+            },
+            runtime: "browser",
+          });
+          return;
+        }
+
+        // 2. Parse Console.WriteLine(...)
+        if (cleanLine.startsWith("Console.WriteLine")) {
+          const match = cleanLine.match(/Console\.WriteLine\s*\((.*)\)/);
+          if (match) {
+            const expression = match[1].trim();
+            try {
+              const outputValue = evaluateExpression(expression, variables);
+              stdoutLines.push(String(outputValue));
+            } catch (err) {
+              resolve({
+                result: {
+                  error: `Runtime Error on line ${i + 1}: ${err.message}`,
+                },
+                runtime: "browser",
+              });
+              return;
+            }
+          }
+          continue;
+        }
+
+        // 3. Parse Variable Declarations (e.g., int x = 5; string name = "Poly"; var flag = true;)
+        const declMatch = cleanLine.match(
+          /^(int|string|bool|double|char|var)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$/,
+        );
+        if (declMatch) {
+          const [, , varName, expression] = declMatch;
+          try {
+            variables[varName] = evaluateExpression(
+              expression.trim(),
+              variables,
+            );
+          } catch (err) {
+            resolve({
+              result: {
+                error: `Runtime Error on line ${i + 1}: ${err.message}`,
+              },
+              runtime: "browser",
+            });
+            return;
+          }
+          continue;
+        }
+
+        // 4. Parse Variable Re-assignments (e.g., x = 10; score += 5;)
+        const assignMatch = cleanLine.match(
+          /^([a-zA-Z_][a-zA-Z0-9_]*)\s*(\+?=|-\s*=)\s*(.*)$/,
+        );
+        if (assignMatch) {
+          const [, varName, operator, expression] = assignMatch;
+          if (!(varName in variables)) {
+            resolve({
+              result: {
+                error: `Compilation Error (CS0103): The name '${varName}' does not exist in the current context on line ${i + 1}`,
+              },
+              runtime: "browser",
+            });
+            return;
+          }
+
+          try {
+            const value = evaluateExpression(expression.trim(), variables);
+            if (operator === "+=") variables[varName] += value;
+            else if (operator === "-=") variables[varName] -= value;
+            else variables[varName] = value;
+          } catch (err) {
+            resolve({
+              result: {
+                error: `Runtime Error on line ${i + 1}: ${err.message}`,
+              },
+              runtime: "browser",
+            });
+            return;
+          }
+          continue;
+        }
+      }
+
+      // 5. Scope validation check
+      if (openBraces > 0) {
+        resolve({
+          result: { error: "Compilation Error (CS1513): } expected" },
+          runtime: "browser",
+        });
+        return;
+      }
+
+      resolve({
+        result: {
+          stdout:
+            stdoutLines.join("\n") ||
+            "Process exited with code 0 (no printed output).",
+        },
+        runtime: "browser",
+      });
+    }, 400);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Safe expression evaluator — no eval / Function constructor
+// Recursive-descent parser supporting: string/number/boolean literals,
+// variable references, parentheses, unary +/-, and binary operators with
+// correct precedence (*, /, % before +, -).
+// ---------------------------------------------------------------------------
+
+function evaluateExpression(expr, variables) {
+  // Fast path: plain string literal
+  if (expr.startsWith('"') && expr.endsWith('"')) {
+    return expr.slice(1, -1);
+  }
+
+  const parser = new SafeExpressionParser(expr, variables);
+  return parser.parse();
+}
+
+class SafeExpressionParser {
+  constructor(expr, variables) {
+    this.expr = expr;
+    this.variables = variables;
+    this.tokens = tokenizeExpression(expr);
+    this.index = 0;
+  }
+
+  parse() {
+    const value = this.parseAddition();
+    if (!this.isAtEnd()) {
+      throw new Error(`Unexpected token '${this.peek().value}'`);
+    }
+    return value;
+  }
+
+  parseAddition() {
+    let value = this.parseMultiplication();
+
+    while (this.match("+", "-")) {
+      const operator = this.previous().value;
+      const right = this.parseMultiplication();
+      if (operator === "+") {
+        value =
+          typeof value === "string" || typeof right === "string"
+            ? `${value}${right}`
+            : value + right;
+      } else {
+        value = toNumber(value) - toNumber(right);
+      }
+    }
+
+    return value;
+  }
+
+  parseMultiplication() {
+    let value = this.parseUnary();
+
+    while (this.match("*", "/", "%")) {
+      const operator = this.previous().value;
+      const right = toNumber(this.parseUnary());
+      const left = toNumber(value);
+      if (operator === "*") value = left * right;
+      else if (operator === "/") {
+        if (right === 0) throw new Error("DivideByZeroException");
+        value = left / right;
+      } else value = left % right;
+    }
+
+    return value;
+  }
+
+  parseUnary() {
+    if (this.match("-")) return -toNumber(this.parseUnary());
+    if (this.match("+")) return toNumber(this.parseUnary());
+    return this.parsePrimary();
+  }
+
+  parsePrimary() {
+    if (this.matchType("number", "string", "boolean")) {
+      return this.previous().value;
+    }
+
+    if (this.matchType("identifier")) {
+      const name = this.previous().value;
+      if (Object.prototype.hasOwnProperty.call(this.variables, name)) {
+        return this.variables[name];
+      }
+      throw new Error(
+        `The name '${name}' does not exist in the current context`,
+      );
+    }
+
+    if (this.match("(")) {
+      const value = this.parseAddition();
+      if (!this.match(")")) throw new Error("Missing closing parenthesis");
+      return value;
+    }
+
+    throw new Error(
+      `Unexpected token '${this.peek()?.value || "end of expression"}'`,
+    );
+  }
+
+  match(...values) {
+    if (this.isAtEnd()) return false;
+    if (!values.includes(this.peek().value)) return false;
+    this.index += 1;
+    return true;
+  }
+
+  matchType(...types) {
+    if (this.isAtEnd()) return false;
+    if (!types.includes(this.peek().type)) return false;
+    this.index += 1;
+    return true;
+  }
+
+  previous() {
+    return this.tokens[this.index - 1];
+  }
+
+  peek() {
+    return this.tokens[this.index];
+  }
+
+  isAtEnd() {
+    return this.index >= this.tokens.length;
+  }
+}
+
+function tokenizeExpression(expr) {
+  const tokens = [];
+  let index = 0;
+
+  while (index < expr.length) {
+    const char = expr[index];
+
+    if (/\s/.test(char)) {
+      index += 1;
+      continue;
+    }
+
+    if (char === '"') {
+      let value = "";
+      index += 1;
+      while (index < expr.length && expr[index] !== '"') {
+        if (expr[index] === "\\" && index + 1 < expr.length) {
+          const escaped = expr[index + 1];
+          value += escaped === "n" ? "\n" : escaped === "t" ? "\t" : escaped;
+          index += 2;
+        } else {
+          value += expr[index];
+          index += 1;
+        }
+      }
+      if (expr[index] !== '"') throw new Error("Unterminated string literal");
+      tokens.push({ type: "string", value });
+      index += 1;
+      continue;
+    }
+
+    if (/[0-9.]/.test(char)) {
+      const match = expr.slice(index).match(/^\d+(?:\.\d+)?/);
+      if (!match) throw new Error(`Invalid number near '${expr.slice(index)}'`);
+      tokens.push({ type: "number", value: Number(match[0]) });
+      index += match[0].length;
+      continue;
+    }
+
+    if (/[A-Za-z_]/.test(char)) {
+      const match = expr.slice(index).match(/^[A-Za-z_][A-Za-z0-9_]*/);
+      const value = match[0];
+      if (value === "true" || value === "false") {
+        tokens.push({ type: "boolean", value: value === "true" });
+      } else {
+        tokens.push({ type: "identifier", value });
+      }
+      index += value.length;
+      continue;
+    }
+
+    if ("+-*/%()".includes(char)) {
+      tokens.push({ type: "operator", value: char });
+      index += 1;
+      continue;
+    }
+
+    throw new Error(`Unsupported character '${char}'`);
+  }
+
+  return tokens;
+}
+
+function toNumber(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) {
+    throw new Error(`Expected a number but got '${value}'`);
+  }
+  return number;
+}
+
+export function formatCsharpOutput(result) {
+  return result?.stdout || "";
+}
+
+export function getCsharpRuntimeError(result) {
+  return result?.error || null;
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /runJavaScript.js
+--------------------------------------------------------------------------------
+import { executeCode } from "../../playground/services/BrowserExecutor";
+
+export async function runJavaScriptCode(source) {
+  const result = await executeCode(source, "javascript");
+  return { result, runtime: "browser" };
+}
+
+export function formatJavaScriptOutput(result = {}) {
+  return [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+}
+
+export function getJavaScriptRuntimeError(runResult) {
+  return (
+    runResult?.error ||
+    (runResult?.stderr && String(runResult.stderr).trim()) ||
+    ""
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /RunnableCodeBlock.jsx
+--------------------------------------------------------------------------------
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Editor from "@monaco-editor/react";
+import { useAuth } from "../../auth/context/AuthContext";
+import {
+  definePolycodeMonacoTheme,
+  getVSCodeEditorOptions,
+  POLYCODE_VSCODE_THEME,
+} from "../../../shared/utils/monacoTheme";
+import {
+  formatCppOutput,
+  getCppRuntimeError,
+  runCppCode,
+} from "./runCpp";
+import {
+  formatJavaScriptOutput,
+  getJavaScriptRuntimeError,
+  runJavaScriptCode,
+} from "./runJavaScript";
+import {
+  formatPythonOutput,
+  getPythonRuntimeError,
+  runPythonCode,
+} from "./runPython";
+import {
+  formatCsharpOutput,
+  getCsharpRuntimeError,
+  runCsharpCode,
+} from "./runCsharp";
+
+function normalizeLang(lang = "python") {
+  const value = lang.toLowerCase();
+  if (value === "c++" || value === "cpp") return "cpp";
+  if (value === "javascript" || value === "js") return "javascript";
+  if (value === "csharp" || value === "c#") return "csharp";
+  return value;
+}
+
+function monacoLanguage(lang) {
+  if (lang === "cpp") return "cpp";
+  if (lang === "javascript") return "javascript";
+  if (lang === "csharp") return "csharp";
+  return "python";
+}
+
+async function executeTheoryCode(source, lang) {
+  if (lang === "cpp") {
+    return runCppCode(source);
+  }
+  if (lang === "javascript") {
+    return runJavaScriptCode(source);
+  }
+  if (lang === "csharp") {
+    return runCsharpCode(source); 
+  }
+  return runPythonCode(source);
+}
+
+function formatTheoryOutput(result, lang) {
+  if (lang === "cpp") return formatCppOutput(result);
+  if (lang === "javascript") return formatJavaScriptOutput(result);
+  if (lang === "csharp") return formatCsharpOutput(result);
+  return formatPythonOutput(result);
+}
+
+function getTheoryRuntimeError(result, lang) {
+  if (lang === "cpp") return getCppRuntimeError(result);
+  if (lang === "javascript") return getJavaScriptRuntimeError(result);
+  if (lang === "csharp") return getCsharpRuntimeError(result);
+  return getPythonRuntimeError(result);
+}
+
+export default function RunnableCodeBlock({
+  block,
+  accentColor = "#4f46e5",
+  language = "python",
+}) {
+  const { loading: authLoading, isAuthenticated } = useAuth();
+  const canRun = isAuthenticated && !authLoading;
+
+  const lang = normalizeLang(block.lang || language);
+  const editorLang = monacoLanguage(lang);
+  const displayLang = (block.lang || language).toUpperCase();
+
+  const [copied, setCopied] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [output, setOutput] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [code, setCode] = useState(block.content);
+
+  useEffect(() => {
+    setCode(block.content);
+    setOutput(null);
+    setIsEditing(false);
+  }, [block.content]);
+
+  function copyCode() {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  function clearOutput() {
+    setOutput(null);
+  }
+
+  function resetCode() {
+    setCode(block.content);
+    setOutput(null);
+  }
+
+  async function handleRun() {
+    if (!canRun || running) return;
+
+    setRunning(true);
+    setOutput({ status: "running", stdout: "Running…" });
+
+    try {
+      const { result, runtime } = await executeTheoryCode(code, lang);
+      const runtimeError = getTheoryRuntimeError(result, lang);
+
+      if (runtimeError) {
+        setOutput({ status: "fail", stdout: runtimeError });
+        return;
+      }
+
+      const stdout =
+        formatTheoryOutput(result, lang) ||
+        (runtime === "server"
+          ? "Ran on server (no printed output)."
+          : "Ran in browser (no printed output).");
+
+      setOutput({ status: "pass", stdout });
+    } catch (error) {
+      setOutput({
+        status: "fail",
+        stdout: error.message || "Could not run this example.",
+      });
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  return (
+    <div className="oops-code-block oops-code-block-runnable">
+      <div className="oops-code-label">
+        <span className="oops-code-lang">{displayLang}</span>
+        {block.label && <span className="oops-code-file">{block.label}</span>}
+        <div className="oops-code-actions">
+          <button
+            type="button"
+            className="oops-copy-btn"
+            onClick={() => setIsEditing((value) => !value)}
+          >
+            {isEditing ? "Done" : "Edit"}
+          </button>
+          {isEditing && (
+            <button type="button" className="oops-copy-btn" onClick={resetCode}>
+              Reset
+            </button>
+          )}
+          <button type="button" className="oops-copy-btn" onClick={copyCode}>
+            {copied ? "✓ Copied" : "Copy"}
+          </button>
+          <button
+            type="button"
+            className="oops-run-code-btn"
+            style={{ "--accent": accentColor }}
+            onClick={handleRun}
+            disabled={!canRun || running}
+            title={!canRun ? "Sign in or sign up to run code" : undefined}
+          >
+            {authLoading
+              ? "…"
+              : running
+                ? "⟳ Running…"
+                : canRun
+                  ? "▶ Run"
+                  : "Sign in to run"}
+          </button>
+        </div>
+      </div>
+
+      <div className="oops-theory-editor">
+        <Editor
+          height="220px"
+          language={editorLang}
+          value={code}
+          beforeMount={definePolycodeMonacoTheme}
+          theme={POLYCODE_VSCODE_THEME}
+          onChange={(value) => setCode(value ?? "")}
+          options={getVSCodeEditorOptions({
+            fontSize: 13,
+            readOnly: !isEditing,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            lineNumbers: "on",
+            folding: true,
+            wordWrap: "on",
+          })}
+        />
+      </div>
+
+      {!canRun && !authLoading && (
+        <div className="oops-auth-gate oops-auth-gate-theory">
+          <p>
+            Sign in or create an account to run examples and see output here.
+          </p>
+          <div className="oops-auth-gate-actions">
+            <Link to="/login" className="oops-auth-gate-btn">
+              Sign in
+            </Link>
+            <Link
+              to="/signup"
+              className="oops-auth-gate-btn oops-auth-gate-btn-primary"
+            >
+              Sign up
+            </Link>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`oops-theory-output oops-output-panel ${
+          output?.status ? `oops-output-${output.status}` : ""
+        }`}
+      >
+        <div className="oops-output-head">
+          <span>Output</span>
+          <div className="oops-output-head-actions">
+            <small>
+              {output ? "after last run" : "run the example to see output"}
+            </small>
+            {output && (
+              <button
+                type="button"
+                className="oops-clear-output-btn"
+                onClick={clearOutput}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+        <pre className="oops-output-body">
+          {output?.stdout || "Output will appear here after you run the code."}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /runPython.js
+--------------------------------------------------------------------------------
+import { executeCode } from "../../playground/services/BrowserExecutor";
+import { getApiBase } from "../../../config/apiBase";
+
+async function runPythonOnServer(source) {
+  const endpoints = ["/challenges/run-python", "/documents/run-python"];
+  let lastError = null;
+
+  for (const path of endpoints) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+
+    try {
+      const response = await fetch(`${getApiBase()}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: source }),
+        signal: controller.signal,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        lastError = new Error(
+          payload.message || payload.error || `Python API failed (${path})`,
+        );
+        continue;
+      }
+      return payload;
+    } catch (error) {
+      lastError = error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  throw lastError || new Error("Python API unavailable");
+}
+
+async function runPythonInBrowser(source) {
+  return executeCode(source, "python");
+}
+
+export async function runPythonCode(source) {
+  try {
+    return { result: await runPythonOnServer(source), runtime: "server" };
+  } catch (serverError) {
+    try {
+      return { result: await runPythonInBrowser(source), runtime: "browser" };
+    } catch (browserError) {
+      throw new Error(
+        serverError.message ||
+          browserError.message ||
+          "Could not run Python. Start the backend or check your network for Pyodide.",
+      );
+    }
+  }
+}
+
+export function formatPythonOutput(result = {}) {
+  return [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+}
+
+export function getPythonRuntimeError(runResult) {
+  return (
+    runResult?.error ||
+    (runResult?.exitCode != null && runResult.exitCode !== 0
+      ? runResult.stderr || "Python exited with an error"
+      : "")
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /useChallengeCelebration.js
+--------------------------------------------------------------------------------
+import { useCallback, useEffect, useState } from "react";
+
+const AUTO_DISMISS_MS = 3800;
+
+export function useChallengeCelebration(challengeId) {
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  useEffect(() => {
+    setShowCelebration(false);
+  }, [challengeId]);
+
+  useEffect(() => {
+    if (!showCelebration) return undefined;
+    const timer = window.setTimeout(() => setShowCelebration(false), AUTO_DISMISS_MS);
+    return () => window.clearTimeout(timer);
+  }, [showCelebration]);
+
+  const triggerCelebration = useCallback(() => {
+    setShowCelebration(true);
+  }, []);
+
+  const dismissCelebration = useCallback(() => {
+    setShowCelebration(false);
+  }, []);
+
+  return { showCelebration, triggerCelebration, dismissCelebration };
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /useLessonReadGate.js
+--------------------------------------------------------------------------------
+import { useCallback, useEffect, useState } from "react";
+
+function readStorageKey(prefix, lessonId) {
+  return `${prefix}_read_${lessonId}`;
+}
+
+function confidenceStorageKey(prefix, lessonId) {
+  return `${prefix}_confidence_${lessonId}`;
+}
+
+/**
+ * Shared read gate + confidence state for all learn courses.
+ * @param {string} storagePrefix - e.g. "numpy_py", "oops", "pointers_cpp"
+ * @param {string} lessonId
+ */
+export default function useLessonReadGate(storagePrefix, lessonId) {
+  const [markedAsRead, setMarkedAsRead] = useState(false);
+  const [confidence, setConfidence] = useState("");
+
+  useEffect(() => {
+    if (!lessonId || !storagePrefix) return;
+    setMarkedAsRead(
+      localStorage.getItem(readStorageKey(storagePrefix, lessonId)) === "true",
+    );
+    setConfidence(
+      localStorage.getItem(confidenceStorageKey(storagePrefix, lessonId)) || "",
+    );
+  }, [lessonId, storagePrefix]);
+
+  const markAsRead = useCallback(() => {
+    if (!lessonId || !storagePrefix) return;
+    setMarkedAsRead(true);
+    localStorage.setItem(readStorageKey(storagePrefix, lessonId), "true");
+  }, [lessonId, storagePrefix]);
+
+  const handleConfidenceChange = useCallback(
+    (value) => {
+      if (!lessonId || !storagePrefix) return;
+      setConfidence(value);
+      localStorage.setItem(confidenceStorageKey(storagePrefix, lessonId), value);
+    },
+    [lessonId, storagePrefix],
+  );
+
+  const createGoToChallenge = useCallback(
+    (setTab) => () => {
+      if (!markedAsRead) return;
+      setTab("challenge");
+    },
+    [markedAsRead],
+  );
+
+  const challengeTabLocked = !markedAsRead;
+
+  return {
+    markedAsRead,
+    markAsRead,
+    confidence,
+    handleConfidenceChange,
+    createGoToChallenge,
+    challengeTabLocked,
+  };
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /VerifyCertificatePage.jsx
+--------------------------------------------------------------------------------
+import { useSearchParams } from "react-router-dom";
+import { useRef, useState } from "react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+
+export default function VerifyCertificatePage() {
+  const [searchParams] = useSearchParams();
+  const certificateRef = useRef();
+  const [downloading, setDownloading] = useState(false);
+
+  const certId = searchParams.get("id");
+  const userName = searchParams.get("name");
+  const courseName = searchParams.get("course");
+  const issueDate = searchParams.get("date");
+  const completedCount = searchParams.get("lessons");
+  const earnedXP = searchParams.get("xp");
+
+  if (!certId || !userName || !courseName) {
+    return (
+      <div className="error-page">
+        Invalid or missing certificate credentials.
+      </div>
+    );
+  }
+
+  async function downloadPDF() {
+    if (!certificateRef.current) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 4,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+      pdf.addImage(
+        imgData,
+        "PNG",
+        0,
+        0,
+        pdf.internal.pageSize.getWidth(),
+        pdf.internal.pageSize.getHeight(),
+      );
+      pdf.save(`${courseName.replace(/\s+/g, "-")}-${certId}.pdf`);
+    } catch (err) {
+      console.error("PDF error:", err.message);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <div className="verification-container">
+      <div
+        className="verification-banner"
+        style={{
+          backgroundColor: "#22c55e",
+          color: "#fff",
+          padding: "10px",
+          textAlign: "center",
+        }}
+      >
+        ✓ This is an officially verified PolyCode certificate.
+      </div>
+
+      <div className="certificate-wrapper">
+        <div className="certificate" ref={certificateRef}>
+          <div className="certificate-watermark">
+            <img src="/images/polycode-logo.png" alt="" />
+          </div>
+
+          <div className="certificate-header">
+            <img
+              src="/images/polycode-logo.png"
+              alt="PolyCode"
+              className="certificate-logo1"
+            />
+            <img
+              src="/images/logo.png"
+              alt="QuantumLogics"
+              className="certificate-logo2"
+            />
+          </div>
+
+          <div className="certificate-company">
+            PolyCode powered by QuantumLogics
+          </div>
+          <h1 className="certificate-title">CERTIFICATE OF COMPLETION</h1>
+          <div className="cert-divider">✦ ✦ ✦</div>
+          <p className="certificate-awarded">
+            This certificate is proudly awarded to
+          </p>
+          <h2 className="certificate-name">{userName}</h2>
+          <p className="certificate-text">For successfully completing</p>
+          <h3 className="certificate-course">{courseName}</h3>
+
+          <div className="certificate-stats">
+            <div>
+              <strong>{completedCount}</strong>
+              <span>Lessons Completed</span>
+            </div>
+            <div>
+              <strong>{earnedXP}</strong>
+              <span>XP Earned</span>
+            </div>
+          </div>
+
+          <div className="certificate-info">
+            <div>
+              <strong>Issued On</strong>
+              <p>{issueDate}</p>
+            </div>
+            <div>
+              <strong>Certificate ID</strong>
+              <p style={{ fontSize: "0.7em", wordBreak: "break-all" }}>
+                {certId}
+              </p>
+            </div>
+          </div>
+
+          <div className="certificate-footer">
+            <div className="signature-block">
+              <img
+                src="/images/aminasign.png"
+                alt="Signature"
+                className="signature-image"
+              />
+              <div className="signature-line" />
+              <p className="signature-name">Amina</p>
+              <p className="signature-role">Course Instructor</p>
+            </div>
+
+            <img
+              src="/images/stamp.png"
+              alt="Official Stamp"
+              className="official-stamp"
+            />
+          </div>
+        </div>
+
+        <div className="certificate-actions">
+          <button
+            className="download-btn"
+            onClick={downloadPDF}
+            disabled={downloading}
+          >
+            {downloading ? "Generating PDF…" : "⬇ Download PDF"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+--------------------------------------------------------------------------------
+FILE: /youtubeUtils.js
+--------------------------------------------------------------------------------
+/** Extract YouTube video id from common URL formats. */
+export function getYouTubeVideoId(url = "") {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      return parsed.pathname.slice(1).split("/")[0] || null;
+    }
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (parsed.pathname === "/watch") {
+        return parsed.searchParams.get("v");
+      }
+      const embedMatch = parsed.pathname.match(/^\/embed\/([^/?]+)/);
+      if (embedMatch) return embedMatch[1];
+      const shortsMatch = parsed.pathname.match(/^\/shorts\/([^/?]+)/);
+      if (shortsMatch) return shortsMatch[1];
+    }
+  } catch {
+    // Fall through to regex for bare ids.
+  }
+
+  if (/^[\w-]{11}$/.test(trimmed)) return trimmed;
+  return null;
+}
+
+export function getYouTubeEmbedUrl(url = "") {
+  const id = getYouTubeVideoId(url);
+  return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+}
+
+export function getYouTubeWatchUrl(url = "") {
+  const id = getYouTubeVideoId(url);
+  return id ? `https://www.youtube.com/watch?v=${id}` : null;
+}
+
+
+================================================================================
+END OF FOLDER: shared
+================================================================================
